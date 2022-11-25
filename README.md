@@ -1,5 +1,5 @@
 # Aegon
-# Aegon is an personal assistant project which is created in order to make it a Windows application for performing many tasks without touching the system physically.
+## Aegon is an personal assistant project which is created in order to make it a Windows application for performing many tasks without touching the system physically.
 
 <p align="center">
   <img src="https://github.com/AryanSharma9917/Aegon/blob/main/indicators/AEGON.png" width="371px" height="350px">
