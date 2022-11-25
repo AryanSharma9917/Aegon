@@ -1,6 +1,11 @@
 # Aegon
 # Aegon is an personal assistant project which is created in order to make it a Windows application for performing many tasks without touching the system physically.
 
+<p align="center">
+  <img src="https://github.com/AryanSharma9917/Aegon/blob/main/indicators/mind-burst-frame-series-composition-human-face-wire-frame-fractal-elements-metaphorical-relationship-to-reason-45766160.jpg" width="371px" height="350px">
+</p>
+<h2 align="center">Natural Language User Interface Program with Python</h2>
+
 ## Prerequisites
    - **MacOS** <br> _Tested on **macOS High Sierra, Mojave, Catalina, Big Sur, Monterey and Ventura***_
      - `System Preferences` → `Security & Privacy` → `Privacy`
@@ -223,5 +228,3 @@ Clean code with pre-commit hooks: [`flake8`](https://flake8.pycqa.org/en/latest/
 
 ## Runbook
 [![made-with-sphinx-doc](https://img.shields.io/badge/Code%20Docs-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/en/master/man/sphinx-autogen.html)
-
-[https://thevickypedia.github.io/Jarvis/](https://thevickypedia.github.io/Jarvis/)
