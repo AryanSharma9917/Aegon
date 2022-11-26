@@ -7,17 +7,7 @@
 <h2 align="center">Natural Language User Interface Program with Python</h2>
 
 ## Prerequisites
-   - **MacOS** <br> _Tested on **macOS High Sierra, Mojave, Catalina, Big Sur, Monterey and Ventura***_
-     - `System Preferences` → `Security & Privacy` → `Privacy`
-     - Click `+` sign and add the preferred `IDE` and `Terminal` in the following sections in left pane.
-       - `Microphone` - **Required** to listen and respond.
-       - `Accessibility` - **Required** to use key combinations for brightness and volume controls.
-       - `Camera` - **[Optional]** Required only during face recognition/detection.
-       - `Automation` - **Required** to control `System Events` and other apps like Outlook and Calendar.
-       - `Files and Folders` **[OR]** `Full Disk Access` - **Required** for all `FileIO` operations.
-
-     :warning: Known Issue with <a href=https://pypi.org/project/pyttsx3/>pyttsx3 module</a> on <a href=https://www.apple.com/macos/ventura/> macOS Ventura 13.0</a>: This version of macOS does not hold the attribute `VoiceAge`. <a href=https://github.com/nateshmbhat/pyttsx3/pull/247>Workaround has been raised as a PR</a><br><br>
-
+   
    - **Windows** <br> _Tested on **Windows 11**_
      - `Settings` → `Privacy`
        - `Microphone` - **Required** to listen and respond.
