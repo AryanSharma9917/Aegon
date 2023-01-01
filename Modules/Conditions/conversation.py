@@ -30,7 +30,7 @@ whats_up = ["what's up", "what is up", "what's going on", "sup", "whats up"]
 about_me = ["tell me about you", "tell me something about you", "i would like to get you know you",
             "tell me about yourself"]
 
-wake_up1   =  [f"For you {models.env.title}! Always!", f"At your service {models.env.title}!"]
+wake_up1 = [f"For you {models.env.title}! Always!", f"At your service {models.env.title}!"]
 
 wake_up2 = [f"Up and running {models.env.title}!", f"We are online and ready {models.env.title}!",
             f"I have indeed been uploaded {models.env.title}!",
