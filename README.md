@@ -4,7 +4,7 @@
 <h2 align="center">Natural Language User Interface Program with Python</h2>
 
 [![ForTheBadge made-with-python](http://ForTheBadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
-[![ForTheBadge built-with-swag](http://ForTheBadge.com/images/badges/built-with-swag.svg)](https://github.com/thevickypedia/Jarvis)
+[![ForTheBadge built-with-swag](http://ForTheBadge.com/images/badges/built-with-swag.svg)](https://github.com/AryanSharma9917/Aegon)
 
 ![Python](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue)
 
@@ -16,8 +16,6 @@
 
 ![Language count](https://img.shields.io/github/languages/count/thevickypedia/Jarvis)
 ![Code coverage](https://img.shields.io/github/languages/top/thevickypedia/Jarvis)
-
-
 
 **Code Stats**
 
