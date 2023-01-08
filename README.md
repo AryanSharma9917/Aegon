@@ -38,20 +38,20 @@
 ## Setup
 
 > **Test Peripherals**:
->   - Camera: [camera.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/camera/camera.py)
->   - Speaker: [speak.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/speaker/speak.py)
->   - Microphone: [mic.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/mic.py)
->   - Speech Recognition: [recognizer.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/recognizer.py)
+>   - Camera: [camera.py](https://github.com/Aryansharma9917/Aegon/blob/master/modules/camera/camera.py)
+>   - Speaker: [speak.py](https://github.com/Aryansharma9917/Aegon/blob/master/modules/speaker/speak.py)
+>   - Microphone: [mic.py](https://github.com/Aryansharma9917/Aegon/blob/master/modules/microphone/mic.py)
+>   - Speech Recognition: [recognizer.py](https://github.com/Aryansharma9917/Aegon/blob/master/modules/microphone/recognizer.py)
 
-   - Download the latest stable release from [pypi](https://github.com/thevickypedia/Jarvis/archive/master.zip) or the latest un released version from [github](https://github.com/thevickypedia/Jarvis/archive/refs/heads/master.zip)
-   - Navigate into the downloaded `jarvis` or `jarvis-master` directory.
+   - Download the latest stable release from [pypi](https://github.com/Aryansharma9917/Aegon/archive/master.zip) or the latest un released version from [github](https://github.com/Aryansharma9917/Aegon/archive/refs/heads/master.zip)
+   - Navigate into the downloaded `aegon` or `aegon-master` directory.
    - Run the following commands in a command-line/terminal:
      1. `python3 -m venv venv` - Creates a virtual env named `venv`
      2. `source venv/bin/activate` - Activates the virtual env `venv`
      3. `which python` - Validate which python is being used. Should be the one within the virtual env `venv`
-     4. `chmod +x lib/install.sh` - Makes [installation file](https://github.com/thevickypedia/Jarvis/blob/master/lib/install.sh) as executable.
+     4. `chmod +x lib/install.sh` - Makes [installation file](https://github.com/Aryansharma9917/Aegon/blob/master/lib/install.sh) as executable.
      5. `bash lib/installs.sh` - Installs the required modules based on the operating system.
-     6. [`python jarvis.py`](https://git.io/JBnPz) - BOOM, you're all set, go ahead and interact with Jarvis.
+     6. [`python jarvis.py`](https://git.io/JBnPz) - BOOM, you're all set, go ahead and interact with Aegon.
 
 ## ENV Variables
 Environment variables are loaded from a `.env` file and validated using `pydantic`
@@ -61,7 +61,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 
 - **ROOT_PASSWORD** - System password to get the system vitals and run other `sudo` commands.
 - **TITLE** - Title which Jarvis should address the user by. Defaults to `sir`
-- **NAME** - Name which Jarvis should address the user by. Defaults to `Vignesh`
+- **NAME** - Name which Jarvis should address the user by. Defaults to `Aryan`
 - **WAKE_WORDS** - List of wake words to initiate Jarvis' listener. Defaults to `['jarvis']` (Defaults to `['alexa']` in legacy macOS)<br>
 :warning: Jarvis has limitations on the wake words as it relies on ML libraries for wake word detection.
 
@@ -88,7 +88,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
     <summary><strong><i>Custom settings for speech recognition</i></strong></summary>
 
     These are customized according to the author's voice pitch.
-    Please use [mic.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/mic.py) to figure out the suitable values in a trial and error method.
+    Please use [mic.py](https://github.com/Aryansharma9917/Jarvis/blob/master/modules/microphone/mic.py) to figure out the suitable values in a trial and error method.
 
     > These settings are added (optionally), to avoid the hard coded `PHRASE_LIMIT`
     > <br>
