@@ -9,6 +9,7 @@
     <title>Prerequisites &#8212; Jarvis  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/static.css" />
     
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
@@ -49,7 +50,7 @@
 <a class="reference external" href="https://github.com/thevickypedia/Jarvis"><img alt="ForTheBadge built-with-swag" src="http://ForTheBadge.com/images/badges/built-with-swag.svg" /></a></p>
 <p><img alt="Python" src="https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-blue" /></p>
 <p><strong>Platform Supported</strong></p>
-<p><img alt="Generic badge" src="https://img.shields.io/badge/Platform-MacOS%7CWindows-1f425f.svg" /></p>
+<p><img alt="Generic badge" src="https://img.shields.io/badge/Platform-Linux%7CMacOS%7CWindows-1f425f.svg" /></p>
 <p><strong>Language Stats</strong></p>
 <p><img alt="Language count" src="https://img.shields.io/github/languages/count/thevickypedia/Jarvis" />
 <img alt="Code coverage" src="https://img.shields.io/github/languages/top/thevickypedia/Jarvis" /></p>
@@ -87,7 +88,7 @@
 <p><strong>Development and Maintenance</strong></p>
 <p><a class="reference external" href="https://github.com/thevickypedia/Jarvis"><img alt="Active Development" src="https://img.shields.io/badge/Development%20Level-Actively%20Developed-success.svg" /></a>
 <a class="reference external" href="https://github.com/thevickypedia/Jarvis"><img alt="Actively Maintained" src="https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-success.svg" /></a></p>
-<p><a class="reference external" href="https://api.github.com/repos/thevickypedia/Jarvis"><img alt="Maintained" src="https://img.shields.io/maintenance/yes/2022" /></a>
+<p><a class="reference external" href="https://api.github.com/repos/thevickypedia/Jarvis"><img alt="Maintained" src="https://img.shields.io/maintenance/yes/2023" /></a>
 <a class="reference external" href="https://vigneshrao.com/"><img alt="Maintainer" src="https://img.shields.io/badge/Maintained%20By-Vignesh%20Sivanandha%20Rao-blue.svg" /></a></p>
 <p><strong>Reach Out</strong></p>
 <p><a class="reference external" href="https://vigneshrao.com/contact"><img alt="Ask Me | Anything " src="https://img.shields.io/badge/Ask%20me-Anything-1abc9c.svg" /></a></p>
@@ -115,10 +116,18 @@
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">Microphone</span></code> - <strong>Required</strong> to listen and respond.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Camera</span></code> - <strong>[Optional]</strong> Required only during face recognition/detection.</p></li>
-<li><p>Unlike macOS, <code class="docutils literal notranslate"><span class="pre">Windows</span></code> pops a confirmation window to <strong>Allow</strong> or <strong>Deny</strong> access to files and folders.</p></li>
+<li><p>Unlike <code class="docutils literal notranslate"><span class="pre">macOS</span></code>, <code class="docutils literal notranslate"><span class="pre">Windows</span></code> pops a confirmation window to <strong>Allow</strong> or <strong>Deny</strong> access to files and folders.</p></li>
 </ul>
 </li>
-<li><p>Install <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/">Anaconda</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#windows-installers">Miniconda</a>, and <a class="reference external" href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">VisualStudio C++ BuildTools</a></p></li>
+<li><p>Install <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/">Anaconda</a> or <a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html#windows-installers">Miniconda</a>, <a class="reference external" href="https://visualstudio.microsoft.com/visual-cpp-build-tools/">VisualStudio C++ BuildTools</a>, and <a class="reference external" href="https://git-scm.com/download/win/">Git</a></p></li>
+<li><p>Make sure C++ build tools are installed completely and restart</p></li>
+<li><p>Add anaconda/miniconda scripts location to <code class="docutils literal notranslate"><span class="pre">PATH</span></code> in Environment Variables</p></li>
+</ul>
+</li>
+<li><p><strong>Linux</strong> <br> <em>Tested on <strong>Ubuntu 22.04 LTS</strong></em></p>
+<ul class="simple">
+<li><p>Store the host machine’s password as the env var: <code class="docutils literal notranslate"><span class="pre">ROOT_PASSWORD</span></code></p></li>
+<li><p>Unlike macOS and Windows, <code class="docutils literal notranslate"><span class="pre">Ubuntu</span></code> does not have app specific permissions.</p></li>
 </ul>
 </li>
 </ul>
@@ -129,9 +138,8 @@
 <div><p><strong>Test Peripherals</strong>:</p>
 <ul class="simple">
 <li><p>Camera: <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/camera/camera.py">camera.py</a></p></li>
-<li><p>Speaker: <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/speaker/speak.py">speak.py</a></p></li>
-<li><p>Microphone: <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/mic.py">mic.py</a></p></li>
-<li><p>Speech Recognition: <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/recognizer.py">recognizer.py</a></p></li>
+<li><p>Text to Speech: <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/speaker/speak.py">speak.py</a></p></li>
+<li><p>Speech to Text: <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/recognizer.py">recognizer.py</a></p></li>
 </ul>
 </div></blockquote>
 <ul class="simple">
@@ -154,7 +162,7 @@
 <p>Environment variables are loaded from a <code class="docutils literal notranslate"><span class="pre">.env</span></code> file and validated using <code class="docutils literal notranslate"><span class="pre">pydantic</span></code></p>
 <details>
 <summary><strong>More on Environment variables</strong></summary><ul>
-<li><p><strong>ROOT_PASSWORD</strong> - System password to get the system vitals and run other <code class="docutils literal notranslate"><span class="pre">sudo</span></code> commands.</p></li>
+<li><p><strong>ROOT_PASSWORD</strong> - System password to get the system vitals and run other <code class="docutils literal notranslate"><span class="pre">sudo</span></code> commands. Mandatory for <code class="docutils literal notranslate"><span class="pre">Linux</span></code></p></li>
 <li><p><strong>TITLE</strong> - Title which Jarvis should address the user by. Defaults to <code class="docutils literal notranslate"><span class="pre">sir</span></code></p></li>
 <li><p><strong>NAME</strong> - Name which Jarvis should address the user by. Defaults to <code class="docutils literal notranslate"><span class="pre">Vignesh</span></code></p></li>
 <li><p><strong>WAKE_WORDS</strong> - List of wake words to initiate Jarvis’ listener. Defaults to <code class="docutils literal notranslate"><span class="pre">['jarvis']</span></code> (Defaults to <code class="docutils literal notranslate"><span class="pre">['alexa']</span></code> in legacy macOS)<br>
@@ -178,10 +186,12 @@
 <li><p><strong>SENSITIVITY</strong> - Hot word detection sensitivity. Allowed range: [0-1] Defaults to <code class="docutils literal notranslate"><span class="pre">0.5</span></code></p></li>
 <li><p><strong>TIMEOUT</strong> - Timeout in seconds until which the listener should wait for speech. Defaults to <code class="docutils literal notranslate"><span class="pre">3</span></code></p></li>
 <li><p><strong>PHRASE_LIMIT</strong> - Timeout in seconds until which the listener will remain active. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>LIMITED</strong> - Boolean flag to run only the main version of <code class="docutils literal notranslate"><span class="pre">Jarvis</span></code> skipping background processes. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code> Enforced based on the number of CPU cores.</p></li>
+<li><p><strong>DEBUG</strong> - Boolean flag to enable debug level for logging. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 <li><p><strong>RECOGNIZER_SETTINGS</strong> - A JSON object that has with customized speech recognition settings.</p>
   <details>
   <summary><strong><i>Custom settings for speech recognition</i></strong></summary><p>These are customized according to the author’s voice pitch.
-Please use <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/mic.py">mic.py</a> to figure out the suitable values in a trial and error method.</p>
+Please use <a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/recognizer.py">recognizer.py</a> to figure out the suitable values on a trial and error basis.</p>
 <blockquote>
 <div><p>These settings are added (optionally), to avoid the hard coded <code class="docutils literal notranslate"><span class="pre">PHRASE_LIMIT</span></code>
 <br>
@@ -204,10 +214,16 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 <li><p><code class="docutils literal notranslate"><span class="pre">non_speaking_duration</span></code>: Seconds of non-speaking audio to keep on both sides of the recording.</p></li>
 </ul>
   </details></li>
-<li><p><strong>LIMITED</strong> - Boolean flag to run only the main version of <code class="docutils literal notranslate"><span class="pre">Jarvis</span></code> skipping background processes. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code> Enforced based on the number of CPU cores.</p></li>
-<li><p><strong>CAMERA_INDEX</strong> - Camera index that has to be used. Run <a class="reference external" href="https://github.com/thevickypedia/Jarvis/tree/master/modules/camera/camera.py">camera.py</a> to get the index value of each camera.</p></li>
-<li><p><strong>DEBUG</strong> - Boolean flag to enable debug level for logging. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
 </ul>
+<hr class="docutils" />
+<section id="peripherals">
+<h2>Peripherals<a class="headerlink" href="#peripherals" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>CAMERA_INDEX</strong> - Camera index that has to be used. Run <a class="reference external" href="https://github.com/thevickypedia/Jarvis/tree/master/modules/camera/camera.py">camera.py</a> to get the index value of each camera.</p></li>
+<li><p><strong>SPEAKER_INDEX</strong> - Speaker index that has to be used. Run <a class="reference external" href="https://github.com/thevickypedia/Jarvis/tree/master/modules/peripherals.py">peripherals.py</a> to get the index value of each speaker.</p></li>
+<li><p><strong>MICROPHONE_INDEX</strong> - Microphone index that has to be used. Run <a class="reference external" href="https://github.com/thevickypedia/Jarvis/tree/master/modules/peripherals.py">peripherals.py</a> to get the index value of each microphone.</p></li>
+</ul>
+</section>
 <section id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -237,12 +253,12 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 <p><strong>Calendar/Meeting integrations</strong></p>
 <ul class="simple">
 <li><p><strong>ICS_URL</strong> - Shared calendar URL to get meetings information from. Should end with <code class="docutils literal notranslate"><span class="pre">.ics</span></code></p></li>
-<li><p><strong>EVENT_APP</strong> - To read events from <code class="docutils literal notranslate"><span class="pre">outlook</span></code> or <code class="docutils literal notranslate"><span class="pre">calendar</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">calendar</span></code> <br>
+<li><p><strong>EVENT_APP</strong> - To read events from <code class="docutils literal notranslate"><span class="pre">outlook</span></code> or <code class="docutils literal notranslate"><span class="pre">calendar</span></code> application in <code class="docutils literal notranslate"><span class="pre">macOS</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">calendar</span></code> <br>
 :bulb:   When <code class="docutils literal notranslate"><span class="pre">calender</span></code> is used, the name of the <em>calendar</em> within the <code class="docutils literal notranslate"><span class="pre">Calendar.app</span></code> should be <strong>Jarvis</strong> <br></p></li>
 </ul>
 <p><strong>Background scans [Defaults to 1 hour]</strong></p>
 <ul class="simple">
-<li><p><strong>SYNC_MEETINGS</strong> - Interval in seconds to generate <code class="docutils literal notranslate"><span class="pre">meetings</span></code> information using <code class="docutils literal notranslate"><span class="pre">ics</span></code> URL.</p></li>
+<li><p><strong>SYNC_MEETINGS</strong> - Interval in seconds to generate <code class="docutils literal notranslate"><span class="pre">meetings</span></code> information using an <code class="docutils literal notranslate"><span class="pre">ics</span></code> URL.</p></li>
 <li><p><strong>SYNC_EVENTS</strong> - Interval in seconds to generate <code class="docutils literal notranslate"><span class="pre">events</span></code> information using <code class="docutils literal notranslate"><span class="pre">calendar</span></code> or <code class="docutils literal notranslate"><span class="pre">outlook</span></code> application.</p></li>
 </ul>
 <p><strong><a class="reference external" href="https://github.com/thevickypedia/Jarvis/tree/master/modules/wifi">Wi-Fi Controls</a></strong></p>
@@ -257,11 +273,6 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 <li><p><strong>VPN_PASSWORD</strong> - Password to authenticate vpn-server. Defaults to profile password.</p></li>
 <li><p><strong>VPN_DOMAIN</strong> - Domain name for the hosted zone.</p></li>
 <li><p><strong>VPN_RECORD_NAME</strong> - Alias record name to access VPN server.</p></li>
-</ul>
-<p><strong><a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/tv/tv_controls.py">TV</a> controls</strong> - Applies only for <a class="reference external" href="https://en.wikipedia.org/wiki/WebOS">LGWebOS</a></p>
-<ul class="simple">
-<li><p><strong>TV_CLIENT_KEY</strong> - TV’s Client key. Auto-generated when used for the first time.</p></li>
-<li><p><strong>TV_MAC</strong> - TV’s mac address. Can be single [str] or multiple [list] mac addresses (to include both wired and wireless macs).</p></li>
 </ul>
 <p><strong><a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/car">Car Controls</a></strong> - Applies only for JLR vehicles subscribed to <code class="docutils literal notranslate"><span class="pre">InControl</span></code> application.</p>
 <ul class="simple">
@@ -282,7 +293,9 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 </ul>
 <p><strong><a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/modules/audio/speech_synthesis.py">OS Agnostic Voice Model</a></strong></p>
 <ul>
-<li><p><strong>SPEECH_SYNTHESIS_TIMEOUT</strong> - Timeout to connect to the docker container that processes text to speech requests. <br></p>
+<li><p><strong>SPEECH_SYNTHESIS_TIMEOUT</strong> - Timeout to connect to the docker container that processes text to speech requests.</p></li>
+<li><p><strong>SPEECH_SYNTHESIS_VOICE</strong> - Voice for the speech synthesis model. Defaults to author’s favorite.</p></li>
+<li><p><strong>SPEECH_SYNTHESIS_QUALITY</strong> - Quality of speech synthesis conversion. Defaults to <code class="docutils literal notranslate"><span class="pre">medium</span></code>. <br></p>
   <details>
   <summary><strong><i>To enable independent speech-synthesis</i></strong></summary><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>docker run <span class="se">\</span>
     -it <span class="se">\</span>
@@ -296,7 +309,7 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
     rhasspy/larynx
 </pre></div>
 </div>
-<p>:bulb:   Optionally run speech synthesis on a docker container for better voices but, response might be slower. If you don’t have docker installed or simply don’t want to use it, set the <code class="docutils literal notranslate"><span class="pre">SPEECH_SYNTHESIS_TIMEOUT</span></code> env var to 0. This is also done automatically if failed to launch a docker container upon startup.</p>
+<p>:bulb:   Speech Synthesis can run on a docker container for better voices but, response might be negligibly slower. If you don’t have docker installed or simply don’t want to use it, set the <code class="docutils literal notranslate"><span class="pre">SPEECH_SYNTHESIS_TIMEOUT</span></code> env var to 0. This is also done automatically if failed to launch a docker container upon startup.</p>
   </details></li>
 </ul>
 <hr class="docutils" />
@@ -317,20 +330,34 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 <li><p><strong>ROBINHOOD_ENDPOINT_AUTH</strong> - Authentication token to access the robinhood portfolio which is generated every hour.</p></li>
 <li><p><strong>SURVEILLANCE_ENDPOINT_AUTH</strong> - Token to access webcam live feed via Jarvis API.</p></li>
 <li><p><strong>SURVEILLANCE_SESSION_TIMEOUT</strong> - Session time out for <code class="docutils literal notranslate"><span class="pre">/surveillance</span></code>. Defaults to 300 seconds.</p></li>
-<li><p><strong>STOCK_MONITOR_ENDPOINT_AUTH</strong> - Token to add a stock price monitor. (Will soon be made <code class="docutils literal notranslate"><span class="pre">open-source</span></code>)</p></li>
 </ul>
-<p><strong>Scheduler</strong></p>
+</details></section>
+<section id="background-tasks">
+<h2>Background Tasks<a class="headerlink" href="#background-tasks" title="Permalink to this heading">¶</a></h2>
+<p>There are two options to run background tasks on Jarvis.</p>
 <ul>
-<li><p><strong>TASKS</strong> - Runs certain tasks at certain intervals.</p>
+<li><p>Jarvis can run internal tasks (offline communicator compatible) at certain intervals using a <code class="docutils literal notranslate"><span class="pre">background_tasks.yaml</span></code> file stored in <code class="docutils literal notranslate"><span class="pre">fileio</span></code> directory.</p>
   <details>
-  <summary><strong><i>Sample value</i></strong></summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">{</span><span class="s">&quot;seconds&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">10_800</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;task&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;remind</span><span class="nv"> </span><span class="s">me</span><span class="nv"> </span><span class="s">to</span><span class="nv"> </span><span class="s">drink</span><span class="nv"> </span><span class="s">water&quot;</span><span class="p p-Indicator">},</span><span class="w">  </span><span class="c1"># Runs every 3 hours</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">{</span><span class="s">&quot;seconds&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">21_600</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;task&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;turn</span><span class="nv"> </span><span class="s">off</span><span class="nv"> </span><span class="s">all</span><span class="nv"> </span><span class="s">lights&quot;</span><span class="p p-Indicator">}</span><span class="w">  </span><span class="c1"># Runs every 6 hours</span><span class="w"></span>
-<span class="p p-Indicator">]</span><span class="w"></span>
+  <summary><strong><i>Setup Instructions</i></strong></summary><p>This is the sample content of <code class="docutils literal notranslate"><span class="pre">background_tasks.yaml</span></code></p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1_800</span><span class="w"></span>
+<span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">turn off all lights</span><span class="w">  </span><span class="c1"># Runs every 30 minutes</span><span class="w"></span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">seconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10_800</span><span class="w"></span>
+<span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">remind me to drink water</span><span class="w">  </span><span class="c1"># Runs every 3 hours ignoring the hours specified</span><span class="w"></span>
+<span class="w">  </span><span class="nt">ignore_hours</span><span class="p">:</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">21</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">23</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">   </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6</span><span class="w"></span>
 </pre></div>
 </div>
   </details></li>
-<li><p><strong>CRONTAB</strong> - Runs scheduled tasks using cron expressions without using actual crontab.</p>
+<li><p><strong>CRONTAB</strong> - Runs external tasks using cron expressions. Needs to be stored as env var.</p>
   <details>
   <summary><strong><i>Sample value</i></strong></summary><div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="w"></span>
 <span class="w">  </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">1-5/2</span><span class="nv"> </span><span class="s">find</span><span class="nv"> </span><span class="s">/var/log</span><span class="nv"> </span><span class="s">-delete&quot;</span><span class="p p-Indicator">,</span><span class="w"></span>
@@ -340,7 +367,7 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 </div>
   </details></li>
 </ul>
-</details></section>
+</section>
 <section id="contacts">
 <h2>Contacts<a class="headerlink" href="#contacts" title="Permalink to this heading">¶</a></h2>
 <p>Jarvis can send on demand notifications using a <code class="docutils literal notranslate"><span class="pre">contacts.yaml</span></code> file stored in <code class="docutils literal notranslate"><span class="pre">fileio</span></code> directory. Uses <a class="reference external" href="https://pypi.org/project/gmail-connector/">gmail-connector</a> for SMS and email notifications.</p>
@@ -359,13 +386,32 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 </details></section>
 <section id="smart-devices">
 <h2>Smart Devices<a class="headerlink" href="#smart-devices" title="Permalink to this heading">¶</a></h2>
-<p>A source file <code class="docutils literal notranslate"><span class="pre">smart_devices.yaml</span></code> is used to store smart devices’ hostnames. <code class="docutils literal notranslate"><span class="pre">Jarvis</span></code> supports <a class="reference external" href="https://www.amazon.com/gp/product/B08C7GY43L"><code class="docutils literal notranslate"><span class="pre">MagicHome</span></code> lights</a> and <code class="docutils literal notranslate"><span class="pre">LGWebOS</span></code> TVs.</p>
-<details>
-<summary><strong><i>Setup Instructions</i></strong></summary><blockquote>
-<div><p>Note: Jarvis currently supports only one hostname for TV but multiple for lights.</p>
-</div></blockquote>
+<p>A source file <code class="docutils literal notranslate"><span class="pre">smart_devices.yaml</span></code> is used to store smart devices’ hostnames.
+Jarvis supports <code class="docutils literal notranslate"><span class="pre">MagicHome</span></code> for <a class="reference external" href="https://www.amazon.com/gp/product/B08C7GY43L">lights</a>, <code class="docutils literal notranslate"><span class="pre">LGWebOS</span></code> and <code class="docutils literal notranslate"><span class="pre">Roku</span></code> for TVs.</p>
+<ul>
+<li><p>TV hostnames should include the brand name [<code class="docutils literal notranslate"><span class="pre">LG</span></code>/<code class="docutils literal notranslate"><span class="pre">Roku</span></code>] to distinguish the modules accordingly.</p>
 <ul class="simple">
-<li><p>The name used in the keys will be the identifier of those light bulbs.</p></li>
+<li><p>This will be set by default, if yours doesn’t include the brand name change it in the TV settings.</p></li>
+</ul>
+</li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">Roku</span></code> TVs, make sure the <code class="docutils literal notranslate"><span class="pre">Bandwidth</span> <span class="pre">saver</span></code> feature is turned off under,</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Settings/Network/Bandwidth saver &gt;&gt; Off
+</pre></div>
+</div>
+</li>
+<li><p>For first time users on <code class="docutils literal notranslate"><span class="pre">LGWebOS</span></code> TVs, there will be a prompt on the TV to accept the connection request.</p>
+<ul class="simple">
+<li><p>Once the connection request is accepted a client key will be generated and logged.</p></li>
+<li><p>Please make sure to store this in <code class="docutils literal notranslate"><span class="pre">smart_devices.yaml</span></code> file to avoid repeated connection prompt.</p></li>
+</ul>
+</li>
+</ul>
+<details>
+<summary><strong><i>Setup Instructions</i></strong></summary><ul class="simple">
+<li><p>TV identifiers should have the word <code class="docutils literal notranslate"><span class="pre">tv</span></code> to distinguish between lights and tv.</p></li>
+<li><p>The name used in the keys (for both lights and tv) will be the identifier when an action is requested.</p></li>
+<li><p>Lights should be a dictionary of identifier and a list of hostnames.</p></li>
+<li><p>TVs should be a nested dictionary of multiple parameters.</p></li>
 <li><p>The source file (<code class="docutils literal notranslate"><span class="pre">smart_devices.yaml</span></code>) should be as following:</p></li>
 </ul>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">bedroom</span><span class="p">:</span><span class="w"></span>
@@ -380,7 +426,15 @@ Cons in using hard coded <code class="docutils literal notranslate"><span class=
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;HOSTNAMES&#39;</span><span class="w"></span>
 <span class="nt">party mode</span><span class="p">:</span><span class="w">  </span><span class="c1"># Light hostnames that needs to be engaged for party mode, if not present individual lights can be enabled</span><span class="w"></span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;HOSTNAMES&#39;</span><span class="w"></span>
-<span class="nt">tv</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;LGWEBOSTV&#39;</span><span class="w"></span>
+<span class="nt">living room tv</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HOSTNAME&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">client_key</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;CLIENT_KEY&#39;</span><span class="w">  </span><span class="c1"># Generated automatically if unavailable</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mac_address</span><span class="p">:</span><span class="w">  </span><span class="c1"># Mac addresses can either be a string or a list</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;WIRED_MAC_ADDRESS&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;WIRELESS_MAC_ADDRESS&#39;</span><span class="w"></span>
+<span class="nt">bedroom tv</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;HOSTNAME&#39;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mac_address</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;MAC_ADDRESS&#39;</span><span class="w"></span>
 </pre></div>
 </div>
 </details></section>
@@ -411,14 +465,15 @@ Date format should match exactly as described below.</p>
 <span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">set my bedroom lights to 100%</span><span class="w"></span>
 <span class="l l-Scalar l-Scalar-Plain">09:00 PM</span><span class="p p-Indicator">:</span><span class="w">  </span><span class="c1"># Runs daily</span><span class="w"></span>
 <span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">set my bedroom lights to 5%</span><span class="w"></span>
+<span class="l l-Scalar l-Scalar-Plain">12:00 AM</span><span class="p p-Indicator">:</span><span class="w">  </span><span class="c1"># Even performs tasks that are not supported via voice commands</span><span class="w"></span>
+<span class="w">  </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">restart all background processes</span><span class="w"></span>
 </pre></div>
 </div>
 </details></section>
 </section>
 <section id="feature-s-implementation">
 <h1>Feature(s) Implementation<a class="headerlink" href="#feature-s-implementation" title="Permalink to this heading">¶</a></h1>
-<p>Please refer <a class="reference external" href="https://github.com/thevickypedia/Jarvis/wiki">wiki</a> for API usage, access controls, env variables,
-features’ overview and demo videos.</p>
+<p>Please refer <a class="reference external" href="https://github.com/thevickypedia/Jarvis/wiki">wiki</a> for API usage, access controls, env variables, features’ overview and demo videos.</p>
 </section>
 <section id="coding-standards">
 <h1>Coding Standards<a class="headerlink" href="#coding-standards" title="Permalink to this heading">¶</a></h1>
@@ -427,15 +482,28 @@ Styling conventions: <a class="reference external" href="https://www.python.org/
 Clean code with pre-commit hooks: <a class="reference external" href="https://flake8.pycqa.org/en/latest/"><code class="docutils literal notranslate"><span class="pre">flake8</span></code></a> and
 <a class="reference external" href="https://pycqa.github.io/isort/"><code class="docutils literal notranslate"><span class="pre">isort</span></code></a></p>
 </section>
+<section id="release-notes">
+<h1><a class="reference external" href="https://github.com/thevickypedia/Jarvis/blob/master/release_notes.rst">Release Notes</a><a class="headerlink" href="#release-notes" title="Permalink to this heading">¶</a></h1>
+<p><strong>Requirement</strong></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python -m pip install changelog-generator
+</pre></div>
+</div>
+<p><strong>Usage</strong></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>changelog reverse -f release_notes.rst -t <span class="s1">&#39;Release Notes&#39;</span>
+</pre></div>
+</div>
+</section>
 <section id="linting">
 <h1>Linting<a class="headerlink" href="#linting" title="Permalink to this heading">¶</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">PreCommit</span></code> will ensure linting, and the doc creation are run on every commit.</p>
-<p><strong>Requirement</strong>
-<br>
-<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-cache</span> <span class="pre">--upgrade</span> <span class="pre">sphinx</span> <span class="pre">pre-commit</span> <span class="pre">recommonmark</span></code></p>
-<p><strong>Usage</strong>
-<br>
-<code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code></p>
+<p><strong>Requirement</strong></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install --no-cache --upgrade <span class="nv">sphinx</span><span class="o">==</span><span class="m">5</span>.1.1 pre-commit recommonmark
+</pre></div>
+</div>
+<p><strong>Usage</strong></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pre-commit run --all-files
+</pre></div>
+</div>
 </section>
 <section id="pypi-package">
 <h1>Pypi Package<a class="headerlink" href="#pypi-package" title="Permalink to this heading">¶</a></h1>
@@ -466,7 +534,9 @@ Clean code with pre-commit hooks: <a class="reference external" href="https://fl
 <li><a class="reference internal" href="#">Prerequisites</a></li>
 <li><a class="reference internal" href="#setup">Setup</a></li>
 <li><a class="reference internal" href="#env-variables">ENV Variables</a><ul>
+<li><a class="reference internal" href="#peripherals">Peripherals</a></li>
 <li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#background-tasks">Background Tasks</a></li>
 <li><a class="reference internal" href="#contacts">Contacts</a></li>
 <li><a class="reference internal" href="#smart-devices">Smart Devices</a></li>
 <li><a class="reference internal" href="#automation-setup-optional">Automation Setup [Optional]</a></li>
@@ -474,6 +544,7 @@ Clean code with pre-commit hooks: <a class="reference external" href="https://fl
 </li>
 <li><a class="reference internal" href="#feature-s-implementation">Feature(s) Implementation</a></li>
 <li><a class="reference internal" href="#coding-standards">Coding Standards</a></li>
+<li><a class="reference internal" href="#release-notes">Release Notes</a></li>
 <li><a class="reference internal" href="#linting">Linting</a></li>
 <li><a class="reference internal" href="#pypi-package">Pypi Package</a></li>
 <li><a class="reference internal" href="#runbook">Runbook</a></li>

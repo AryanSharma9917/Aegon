@@ -17,7 +17,7 @@ from modules.conditions import keywords
 from modules.logger.custom_logger import logger
 from modules.models import models
 from modules.temperature import temperature
-from modules.utils import shared, support
+from modules.utils import shared, support, util
 
 
 def system_info() -> NoReturn:
@@ -28,21 +28,28 @@ def system_info() -> NoReturn:
     free = support.size_converter(byte_size=free)
     ram = support.size_converter(byte_size=models.settings.ram).replace('.0', '')
     ram_used = support.size_converter(byte_size=psutil.virtual_memory().percent).replace(' B', ' %')
-    speaker.speak(text=f"You're running {platform.platform(terse=True)}, with {models.settings.physical_cores} "
+    system = None
+    if models.settings.os == "Linux":
+        mapping = get_distributor_info_linux()
+        if mapping.get('distributor_id') and mapping.get('release'):
+            system = f"{mapping['distributor_id']} {mapping['release']}"
+    if not system:
+        system = f"{shared.hosted_device['os_name']} {shared.hosted_device['os_version']}"
+    speaker.speak(text=f"You're running {system}, with {models.settings.physical_cores} "
                        f"physical cores and {models.settings.logical_cores} logical cores. Your physical drive "
                        f"capacity is {total}. You have used up {used} of space. Your free space is {free}. Your "
                        f"RAM capacity is {ram}. You are currently utilizing {ram_used} of your memory.")
 
 
 def system_vitals() -> None:
-    """Reads system vitals on macOS.
+    """Reads system vitals.
 
     See Also:
         - Jarvis will suggest a reboot if the system uptime is more than 2 days.
         - If confirmed, invokes `restart <https://thevickypedia.github.io/Jarvis/#jarvis.restart>`__ function.
     """
     output = ""
-    if models.settings.macos:
+    if models.settings.os == "Darwin":
         if not models.env.root_password:
             speaker.speak(text=f"You haven't provided a root password for me to read system vitals {models.env.title}! "
                                "Add the root password as an environment variable for me to read.")
@@ -93,7 +100,7 @@ def system_vitals() -> None:
     restart_time = datetime.fromtimestamp(psutil.boot_time())
     second = (datetime.now() - restart_time).total_seconds()
     restart_time = datetime.strftime(restart_time, "%A, %B %d, at %I:%M %p")
-    restart_duration = support.time_converter(seconds=second)
+    restart_duration = util.time_converter(second=second)
     output += f'Restarted on: {restart_time} - {restart_duration} ago from now.'
     if shared.called_by_offline:
         speaker.speak(text=output)
@@ -114,6 +121,26 @@ def system_vitals() -> None:
                 restart(ask=False)
 
 
+def get_distributor_info_linux() -> Dict[str, str]:
+    """Returns distributor information (i.e., Ubuntu) for Linux based systems.
+
+    Returns:
+        dict:
+        A dictionary of key-value pairs with distributor id, name and version.
+    """
+    try:
+        result = subprocess.check_output('lsb_release -a', shell=True, stderr=subprocess.DEVNULL)
+        return {i.split(':')[0].strip().lower().replace(' ', '_'): i.split(':')[1].strip()
+                for i in result.decode(encoding="UTF-8").splitlines() if ':' in i}
+    except (subprocess.SubprocessError, subprocess.CalledProcessError) as error:
+        if isinstance(error, subprocess.CalledProcessError):
+            result = error.output.decode(encoding='UTF-8').strip()
+            logger.error(f"[{error.returncode}]: {result}")
+        else:
+            logger.error(error)
+        return {}
+
+
 def hosted_device_info() -> Dict[str, str]:
     """Gets basic information of the hosted device.
 
@@ -121,10 +148,13 @@ def hosted_device_info() -> Dict[str, str]:
         dict:
         A dictionary of key-value pairs with device type, operating system, os version.
     """
-    if models.settings.macos:
+    if models.settings.os == "Darwin":
         system_kernel = subprocess.check_output("sysctl hw.model", shell=True).decode('utf-8').splitlines()
         device = support.extract_str(system_kernel[0].split(':')[1])
-    else:
+    elif models.settings.os == "Windows":
         device = subprocess.getoutput("WMIC CSPRODUCT GET VENDOR").replace('Vendor', '').strip()
+    else:
+        device = subprocess.check_output("cat /sys/devices/virtual/dmi/id/product_name",
+                                         shell=True).decode('utf-8').strip()
     platform_info = platform.platform(terse=True).split('-')
     return {'device': device, 'os_name': platform_info[0], 'os_version': platform_info[1]}

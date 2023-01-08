@@ -10,13 +10,14 @@ from modules.models import models
 from modules.wifi.connector import ControlConnection, ControlPeripheral
 
 
-def connection_handler() -> NoReturn:
+def wifi_connector() -> NoReturn:
     """Checks for internet connection as per given frequency. Enables Wi-Fi and connects to SSID if connection fails.
 
     See Also:
         - Logs up to 10 consecutive errors from socket module or a total of 5 unknown errors before restarting process.
     """
-    config.multiprocessing_logger(filename=os.path.join('logs', 'connection_checker_%d-%m-%Y.log'))
+    # processName filter is not added since process runs on a single function that is covered by funcName
+    config.multiprocessing_logger(filename=os.path.join('logs', 'wifi_connector_%d-%m-%Y.log'))
     if not models.env.wifi_ssid or not models.env.wifi_password:
         logger.warning("Cannot retry connections without SSID and password.")
         return

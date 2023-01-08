@@ -1,10 +1,12 @@
 import contextlib
+import logging
 
 import requests
 import uvicorn
 
 from executors.port_handler import is_port_in_use, kill_port_pid
 from modules.exceptions import EgressErrors
+from modules.logger import config
 from modules.logger.custom_logger import logger
 from modules.models import models
 
@@ -31,13 +33,17 @@ class APIServer(uvicorn.Server):
         self.run()
 
 
-def trigger_api() -> None:
+def fast_api() -> None:
     """Initiates the fast API in a dedicated process using uvicorn server.
 
     See Also:
         - Checks if the port is being used. If so, makes a ``GET`` request to the endpoint.
         - Attempts to kill the process listening to the port, if the endpoint doesn't respond.
     """
+    api_config = config.APIConfig()
+    config.multiprocessing_logger(filename=api_config.DEFAULT_LOG_FILENAME,
+                                  log_format=logging.Formatter(api_config.DEFAULT_LOG_FORMAT))
+    logger.addFilter(filter=config.AddProcessName(process_name=fast_api.__name__))
     url = f'http://{models.env.offline_host}:{models.env.offline_port}'
 
     if is_port_in_use(port=models.env.offline_port):
@@ -65,5 +71,8 @@ def trigger_api() -> None:
         "reload": True
     }
 
-    config = uvicorn.Config(**argument_dict)
-    APIServer(config=config).run_in_parallel()
+    logger.debug(argument_dict)
+    logger.info(f"Starting FastAPI on Uvicorn server with {models.env.workers} workers.")
+
+    server_conf = uvicorn.Config(**argument_dict)
+    APIServer(config=server_conf).run_in_parallel()

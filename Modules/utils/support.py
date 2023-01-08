@@ -5,19 +5,14 @@
 
 """
 
-import hashlib
 import math
 import os
-import random
 import re
 import socket
-import string
 import sys
 import time
-import uuid
 from datetime import datetime, timezone
-from difflib import SequenceMatcher
-from typing import Any, Hashable, List, NoReturn, Union
+from typing import Any, Iterable, List, NoReturn, Union
 
 import dateutil.tz
 import inflect
@@ -31,6 +26,7 @@ from modules.conditions import keywords
 from modules.database import database
 from modules.logger.custom_logger import logger
 from modules.models import models
+from modules.utils import shared
 
 db = database.Database(database=models.fileio.base_db)
 
@@ -72,8 +68,8 @@ def hostname_to_ip(hostname: str, localhost: bool = True) -> List[str]:
             if _ipaddr_list[0].split('.')[0] == ip_addr.split('.')[0]:
                 return _ipaddr_list
             else:
-                logger.error(f"NetworkID of the InterfaceIP of host {hostname!r} does not match the network id of the "
-                             f"DeviceIP.")
+                logger.error(f"NetworkID of the InterfaceIP [{ip_addr}] of host {hostname!r} does not match the "
+                             f"network id of the DeviceIP [{', '.join(_ipaddr_list)}].")
                 return []
         else:
             return _ipaddr_list
@@ -97,94 +93,27 @@ def celebrate() -> str:
         return "Birthday"
 
 
-def part_of_day() -> str:
-    """Checks the current hour to determine the part of day.
-
-    Returns:
-        str:
-        Morning, Afternoon, Evening or Night based on time of day.
-    """
-    current_hour = int(datetime.now().strftime("%H"))
-    if 5 <= current_hour <= 11:
-        return "Morning"
-    if 12 <= current_hour <= 15:
-        return "Afternoon"
-    if 16 <= current_hour <= 19:
-        return "Evening"
-    return "Night"
-
-
-def time_converter(seconds: float) -> str:
-    """Modifies seconds to appropriate days/hours/minutes/seconds.
-
-    Args:
-        seconds: Takes number of seconds as argument.
-
-    Returns:
-        str:
-        Seconds converted to days or hours or minutes or seconds.
-    """
-    days = round(seconds // 86400)
-    seconds = round(seconds % (24 * 3600))
-    hours = round(seconds // 3600)
-    seconds %= 3600
-    minutes = round(seconds // 60)
-    seconds %= 60
-    if days and hours and minutes and seconds:
-        return f"{days} days, {hours} hours, {minutes} minutes, and {seconds} seconds"
-    elif days and hours and minutes:
-        return f"{days} days, {hours} hours, and {minutes} minutes"
-    elif days and hours:
-        return f"{days} days, and {hours} hours"
-    elif days:
-        return f"{days} days"
-    elif hours and minutes and seconds:
-        return f"{hours} hours, {minutes} minutes, and {seconds} seconds"
-    elif hours and minutes:
-        return f"{hours} hours, and {minutes} minutes"
-    elif hours:
-        return f"{hours} hours"
-    elif minutes and seconds:
-        return f"{minutes} minutes, and {seconds} seconds"
-    elif minutes:
-        return f"{minutes} minutes"
-    else:
-        return f"{seconds} seconds"
-
-
-def get_capitalized(phrase: str, dot: bool = True) -> Union[str, None]:
+def get_capitalized(phrase: str, ignore: Iterable = None, dot: bool = True) -> Union[str, None]:
     """Looks for words starting with an upper-case letter.
 
     Args:
         phrase: Takes input string as an argument.
+        ignore: Takes an iterable of upper case strings to be ignored.
         dot: Takes a boolean flag whether to include words separated by (.) dot.
 
     Returns:
         str:
         Returns the upper case words if skimmed.
     """
+    # Set ignore as a tuple with avoid keywords regardless of current state
+    ignore = tuple(ignore or ()) + tuple(keywords.keywords.avoid)
     place = ""
     for word in phrase.split():
-        if word[0].isupper() and word.lower() not in keywords.keywords.avoid:
+        if word[0].isupper() and word.lower() not in map(lambda x: x.lower(), ignore):  # convert iterable to lowercase
             place += word + " "
         elif "." in word and dot:
             place += word + " "
     return place.strip() if place.strip() else None
-
-
-def get_closest_match(text: str, match_list: list) -> str:
-    """Get the closest matching word from a list of words.
-
-    Args:
-        text: Text to look for in the matching list.
-        match_list: List to be compared against.
-
-    Returns:
-        str:
-        Returns the text that matches closest in the list.
-    """
-    closest_match = [{"key": key, "val": SequenceMatcher(a=text, b=key).ratio()} for key in match_list]
-    return sorted(closest_match, key=lambda d: d["val"], reverse=True)[0].get("key")
 
 
 def unrecognized_dumper(train_data: dict) -> NoReturn:
@@ -269,6 +198,27 @@ def extract_time(input_: str) -> List[str]:
         re.findall(r'(\d+\s?(?:a.m.|p.m.:?))', input_) or \
         re.findall(r'(\d+:\d+\s?(?:am|pm:?))', input_) or \
         re.findall(r'(\d+\s?(?:am|pm:?))', input_)
+
+
+def delay_calculator(phrase: str) -> Union[int, float]:
+    """Calculates the delay in phrase (if any).
+
+    Args:
+        phrase: Takes the phrase spoken as an argument.
+
+    Returns:
+        int:
+        Seconds of delay.
+    """
+    if not (count := extract_nos(input_=phrase)):
+        count = 1
+    if 'hour' in phrase:
+        delay = 3_600
+    elif 'minute' in phrase:
+        delay = 60
+    else:  # Default to # as seconds
+        delay = 60
+    return count * delay
 
 
 def extract_nos(input_: str, method: type = float) -> Union[int, float]:
@@ -519,6 +469,13 @@ def no_env_vars() -> NoReturn:
     speaker.speak(text=f"I'm sorry {models.env.title}! I lack the permissions!")
 
 
+def unsupported_features() -> NoReturn:
+    """Says a message about unsupported features."""
+    logger.error(f"Called by: {sys._getframe(1).f_code.co_name}")  # noqa
+    speaker.speak(text=f"I'm sorry {models.env.title}! This feature is yet to be implemented on "
+                       f"{shared.hosted_device['os_name']}!")
+
+
 def flush_screen() -> NoReturn:
     """Flushes the screen output."""
     if models.settings.ide:
@@ -565,57 +522,3 @@ def stop_process(pid: int) -> NoReturn:
             proc.kill()
     except psutil.NoSuchProcess as error:
         logger.error(error)
-
-
-def hashed(key: uuid.UUID) -> Hashable:
-    """Generates sha from UUID.
-
-    Args:
-        key: Takes the UUID generated as an argument.
-
-    Returns:
-        str:
-        Hashed value of the UUID received.
-    """
-    return hashlib.sha1(key.bytes + bytes(key.hex, "utf-8")).digest().hex()
-
-
-def token() -> Hashable:
-    """Generates a token using hashed uuid4.
-
-    Returns:
-        str:
-        Returns hashed UUID as a string.
-    """
-    return hashed(key=uuid.uuid4())
-
-
-def keygen_str(length: int, punctuation: bool = False) -> str:
-    """Generates random key.
-
-    Args:
-        length: Length of the keygen.
-        punctuation: A boolean flag to include punctuation in the keygen.
-
-    Returns:
-        str:
-        Random key of specified length.
-    """
-    if punctuation:
-        required_str = string.ascii_letters + string.digits + string.punctuation
-    else:
-        required_str = string.ascii_letters + string.digits
-    return "".join(random.choices(required_str, k=length))
-
-
-def keygen_uuid(length: int = 32) -> str:
-    """Generates random key from hex-d UUID.
-
-    Args:
-        length: Length of the required key.
-
-    Returns:
-        str:
-        Random key of specified length.
-    """
-    return uuid.uuid4().hex.upper()[0:length]

@@ -15,19 +15,16 @@ import requests
 import yaml
 from playsound import playsound
 
-from modules.conditions import conversation, keywords
 from modules.exceptions import EgressErrors
 from modules.logger.custom_logger import logger
 from modules.models import models
 from modules.utils import shared
 
-KEYWORDS = [__keyword for __keyword in dir(keywords) if not __keyword.startswith('__')]
-CONVERSATION = [__conversation for __conversation in dir(conversation) if not __conversation.startswith('__')]
-FUNCTIONS_TO_TRACK = KEYWORDS + CONVERSATION
 
-
-def speech_synthesizer(text: str, timeout: Union[int, float] = models.env.speech_synthesis_timeout,
-                       quality: str = "high", voice: str = "en-us_northern_english_male-glow_tts") -> bool:
+def speech_synthesizer(text: str,
+                       timeout: Union[int, float] = models.env.speech_synthesis_timeout,
+                       quality: str = models.env.speech_synthesis_quality,
+                       voice: str = models.env.speech_synthesis_voice) -> bool:
     """Makes a post call to docker container for speech synthesis.
 
     Args:
@@ -49,10 +46,13 @@ def speech_synthesizer(text: str, timeout: Union[int, float] = models.env.speech
     if 'IP' in text.split():
         ip_new = '-'.join([i for i in text.split(' ')[-1]]).replace('-.-', ', ')  # 192.168.1.1 -> 1-9-2, 1-6-8, 1, 1
         text = text.replace(text.split(' ')[-1], ip_new).replace(' IP ', ' I.P. ')
+    # Raises UnicodeDecodeError within docker container
+    text = text.replace("\N{DEGREE SIGN}F", " degrees fahrenheit")
+    text = text.replace("\N{DEGREE SIGN}C", " degrees celsius")
     try:
         response = requests.post(
             url=f"http://{models.env.speech_synthesis_host}:{models.env.speech_synthesis_port}/api/tts",
-            headers={"Content-Type": "text/plain"}, params={"voice": voice, "quality": quality}, data=text,
+            headers={"Content-Type": "text/plain"}, params={"voice": voice, "vocoder": quality}, data=text,
             verify=False, timeout=timeout
         )
         if response.ok:
@@ -67,7 +67,9 @@ def speech_synthesizer(text: str, timeout: Union[int, float] = models.env.speech
     except EgressErrors as error:
         logger.error(error)
         logger.info("Disabling speech synthesis")
-        models.env.speech_synthesis_timeout = 0
+        # Purposely exclude timeout since, larynx takes more time during first iteration to download the required voice
+        if not any((isinstance(error, TimeoutError), isinstance(error, requests.exceptions.Timeout))):
+            models.env.speech_synthesis_timeout = 0
 
 
 def speak(text: str = None, run: bool = False, block: bool = True) -> NoReturn:
@@ -78,14 +80,15 @@ def speak(text: str = None, run: bool = False, block: bool = True) -> NoReturn:
         run: Takes a boolean flag to choose whether to run the ``audio_driver.say`` loop.
         block: Takes a boolean flag to wait other tasks while speaking. [Applies only for larynx running on docker]
     """
-    caller = sys._getframe(1).f_code.co_name  # noqa
+    caller = sys._getframe(1).f_code.co_name  # noqa: PyProtectedMember,PyUnresolvedReferences
+    if caller != 'conditions':  # function where all the magic happens
+        Thread(target=frequently_used, kwargs={"function_name": caller}).start()
     if text:
         text = text.replace('\n', '\t').strip()
         shared.text_spoken = text
         if shared.called_by_offline:
             shared.offline_caller = caller
             return
-        logger.info(f'Speaker called by: {caller!r}')
         logger.info(f'Response: {text}')
         sys.stdout.write(f"\r{text}")
         if models.env.speech_synthesis_timeout and \
@@ -95,9 +98,9 @@ def speak(text: str = None, run: bool = False, block: bool = True) -> NoReturn:
             os.remove(models.fileio.speech_synthesis_wav)
         else:
             models.audio_driver.say(text=text)
-    if run:
+    if run and not shared.called_by_offline:
+        logger.info(f'Speaker called by: {caller!r}')
         models.audio_driver.runAndWait()
-    Thread(target=frequently_used, kwargs={"function_name": caller}).start() if caller in FUNCTIONS_TO_TRACK else None
 
 
 def frequently_used(function_name: str) -> NoReturn:
@@ -125,3 +128,4 @@ def frequently_used(function_name: str) -> NoReturn:
     with open(models.fileio.frequent, 'w') as file:
         yaml.dump(data={k: v for k, v in sorted(data.items(), key=lambda x: x[1], reverse=True)},
                   stream=file, sort_keys=False)
+        file.flush()  # Write everything in buffer to file right away

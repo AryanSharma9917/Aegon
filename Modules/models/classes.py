@@ -11,9 +11,10 @@ import pathlib
 import platform
 import socket
 import sys
+from collections import ChainMap
 from datetime import datetime
 from enum import Enum
-from typing import List, Union
+from typing import List, Optional, Union
 
 import psutil
 import pyttsx3
@@ -23,8 +24,11 @@ from pydantic import (BaseModel, BaseSettings, DirectoryPath, EmailStr, Field,
                       validator)
 
 from modules.exceptions import InvalidEnvVars, UnsupportedOS
+from modules.peripherals import channel_type, get_audio_devices
 
 audio_driver = pyttsx3.init()
+if not os.environ.get('AWS_DEFAULT_REGION'):
+    os.environ['AWS_DEFAULT_REGION'] = 'us-west-2'  # Required when import vpn-server module
 
 
 class Settings(BaseSettings):
@@ -38,7 +42,7 @@ class Settings(BaseSettings):
     """
 
     pid: PositiveInt = os.getpid()
-    runenv: str = psutil.Process(os.getpid()).parent().name()
+    runenv: str = psutil.Process(pid).parent().name()
     ram: Union[PositiveInt, PositiveFloat] = psutil.virtual_memory().total
     physical_cores: PositiveInt = psutil.cpu_count(logical=False)
     logical_cores: PositiveInt = psutil.cpu_count(logical=True)
@@ -49,11 +53,8 @@ class Settings(BaseSettings):
         ide = False
     else:
         ide = True
-    if platform.system() == "Windows":
-        macos: bool = False
-    elif platform.system() == "Darwin":
-        macos: bool = True
-    else:
+    os: str = platform.system()
+    if os not in ["Windows", "Darwin", "Linux"]:
         raise UnsupportedOS(
             f"\n{''.join('*' for _ in range(80))}\n\n"
             "Unsupported Operating System. Currently Jarvis can run only on Mac and Windows OS.\n\n"
@@ -61,7 +62,7 @@ class Settings(BaseSettings):
             "To reach out: https://vigneshrao.com/contact\n"
             f"\n{''.join('*' for _ in range(80))}\n"
         )
-    legacy: bool = True if macos and parser(platform.mac_ver()[0]) < parser('10.14') else False
+    legacy: bool = True if os == "Darwin" and parser(platform.mac_ver()[0]) < parser('10.14') else False
 
 
 settings = Settings()
@@ -102,18 +103,43 @@ class EventApp(str, Enum):
     OUTLOOK = 'outlook'
 
 
-class CustomDict(BaseModel):
+class SSQuality(str, Enum):
+    """Quality modes available for speech synthesis.
+
+    >>> SSQuality
+
+    """
+
+    High_Quality = 'high'
+    Medium_Quality = 'medium'
+    Low_Quality = 'low'
+
+
+class BackgroundTask(BaseModel):
     """Custom links model."""
 
     seconds: int
     task: constr(strip_whitespace=True)
+    ignore_hours: Optional[List[int]] = []
 
     @validator('task', allow_reuse=True)
     def check_empty_string(cls, v, values, **kwargs):  # noqa
         """Validate task field in tasks."""
         if v:
             return v
-        raise ValueError('Bad value')
+        raise ValueError('bad value')
+
+    @validator('ignore_hours', allow_reuse=True)
+    def check_hours_format(cls, v, values, **kwargs):  # noqa
+        """Validate each entry in ignore hours list."""
+        if not v:
+            return []
+        for hour in v:
+            try:
+                datetime.strptime(str(hour), '%H')
+            except ValueError:
+                raise ValueError('ignore hours should be a list of integers in 24H format')
+        return v
 
 
 class EnvConfig(BaseSettings):
@@ -126,13 +152,18 @@ class EnvConfig(BaseSettings):
     # System config
     home: DirectoryPath = Field(default=os.path.expanduser('~'), env='HOME')
     volume: PositiveInt = Field(default=50, env='VOLUME')
-    limited: bool = Field(default=False, env='LIMITED')
+    limited: bool = Field(default=None, env='LIMITED')
     root_user: str = Field(default=getpass.getuser(), env='USER')
     root_password: str = Field(default=None, env='ROOT_PASSWORD')
 
     # Built-in speaker config
     voice_name: str = Field(default=None, env='VOICE_NAME')
     voice_rate: Union[PositiveInt, PositiveFloat] = Field(default=audio_driver.getProperty("rate"), env='VOICE_RATE')
+
+    # Peripheral config
+    camera_index: Union[int, PositiveInt] = Field(default=None, ge=0, env='CAMERA_INDEX')
+    speaker_index: Union[int, PositiveInt] = Field(default=None, ge=0, env='SPEAKER_INDEX')
+    microphone_index: Union[int, PositiveInt] = Field(default=None, ge=0, env='MICROPHONE_INDEX')
 
     # Log config
     debug: bool = Field(default=False, env='DEBUG')
@@ -154,6 +185,8 @@ class EnvConfig(BaseSettings):
     gmail_pass: str = Field(default=None, env='GMAIL_PASS')
     alt_gmail_user: EmailStr = Field(default=None, env='ALT_GMAIL_USER')
     alt_gmail_pass: str = Field(default=None, env='ALT_GMAIL_PASS')
+    open_gmail_user: EmailStr = Field(default=None, env='OPEN_GMAIL_USER')
+    open_gmail_pass: str = Field(default=None, env='OPEN_GMAIL_PASS')
     recipient: EmailStr = Field(default=None, env='RECIPIENT')
     phone_number: str = Field(default=None, regex="\\d{10}$", env='PHONE_NUMBER')
 
@@ -169,8 +202,7 @@ class EnvConfig(BaseSettings):
     sync_meetings: PositiveInt = Field(default=3_600, env='SYNC_MEETINGS')
     sync_events: PositiveInt = Field(default=3_600, env='SYNC_EVENTS')
 
-    # Camera config
-    camera_index: Union[int, PositiveInt] = Field(default=None, le=1, ge=0, env='CAMERA_INDEX')
+    # Surveillance config
     surveillance_endpoint_auth: str = Field(default=None, env='SURVEILLANCE_ENDPOINT_AUTH')
     surveillance_session_timeout: PositiveInt = Field(default=300, env='SURVEILLANCE_SESSION_TIMEOUT')
 
@@ -185,16 +217,9 @@ class EnvConfig(BaseSettings):
     robinhood_qr: str = Field(default=None, env='ROBINHOOD_QR')
     robinhood_endpoint_auth: str = Field(default=None, env='ROBINHOOD_ENDPOINT_AUTH')
 
-    # StockMonitor endpoint auth
-    stock_monitor_endpoint_auth: str = Field(default=None, env='STOCK_MONITOR_ENDPOINT_AUTH')
-
     # GitHub config
     git_user: str = Field(default=None, env='GIT_USER')
     git_pass: str = Field(default=None, env='GIT_PASS')
-
-    # TV config
-    tv_client_key: str = Field(default=None, env='TV_CLIENT_KEY')
-    tv_mac: Union[str, list] = Field(default=None, env='TV_MAC')
 
     # VPN Server config
     vpn_username: str = Field(default=None, env='VPN_USERNAME')
@@ -224,12 +249,13 @@ class EnvConfig(BaseSettings):
 
     # Speech synthesis config
     speech_synthesis_timeout: int = Field(default=3, env='SPEECH_SYNTHESIS_TIMEOUT')
+    speech_synthesis_voice: str = Field(default='en-us_northern_english_male-glow_tts', env='SPEECH_SYNTHESIS_VOICE')
+    speech_synthesis_quality: SSQuality = Field(default=SSQuality.Medium_Quality, env='SPEECH_SYNTHESIS_QUALITY')
     speech_synthesis_host: str = Field(default=socket.gethostbyname('localhost'), env='SPEECH_SYNTHESIS_HOST')
     speech_synthesis_port: int = Field(default=5002, env='SPEECH_SYNTHESIS_PORT')
 
     # Background tasks
-    tasks: List[CustomDict] = Field(default=[], env='TASKS')
-    crontab: List[str] = Field(default=[], env='CRONTAB')
+    crontab: List[str] = Field(default=[], env='CRONTAB')  # User input is gathered from fileio/crontab.yaml
 
     # WiFi config
     wifi_ssid: str = Field(default=None, env='WIFI_SSID')
@@ -249,6 +275,33 @@ class EnvConfig(BaseSettings):
         env_file = ".env"
 
     # noinspection PyMethodParameters
+    @validator("microphone_index", pre=True, allow_reuse=True)
+    def parse_microphone_index(cls, value: Union[int, PositiveInt]) -> Union[int, PositiveInt, None]:
+        """Validates microphone index."""
+        if not value:
+            return
+        if int(value) in list(map(lambda tag: tag['index'], get_audio_devices(channels=channel_type.input_channels))):
+            return value
+        else:
+            complicated = dict(ChainMap(*list(map(lambda tag: {tag['index']: tag['name']},
+                                                  get_audio_devices(channels=channel_type.input_channels)))))
+            raise InvalidEnvVars(f"value should be one of {complicated}")
+
+    # noinspection PyMethodParameters
+    @validator("speaker_index", pre=True, allow_reuse=True)
+    def parse_speaker_index(cls, value: Union[int, PositiveInt]) -> Union[int, PositiveInt, None]:
+        """Validates speaker index."""
+        # TODO: Create an OS agnostic model for usage
+        if not value:
+            return
+        if int(value) in list(map(lambda tag: tag['index'], get_audio_devices(channels=channel_type.output_channels))):
+            return value
+        else:
+            complicated = dict(ChainMap(*list(map(lambda tag: {tag['index']: tag['name']},
+                                                  get_audio_devices(channels=channel_type.output_channels)))))
+            raise InvalidEnvVars(f"value should be one of {complicated}")
+
+    # noinspection PyMethodParameters
     @validator("birthday", pre=True, allow_reuse=True)
     def parse_birthday(cls, value: str) -> Union[str, None]:
         """Validates date value to be in DD-MM format."""
@@ -258,7 +311,7 @@ class EnvConfig(BaseSettings):
             if datetime.strptime(value, "%d-%B"):
                 return value
         except ValueError:
-            raise InvalidEnvVars('Format should be DD-MM')
+            raise InvalidEnvVars('format should be DD-MM')
 
 
 env = EnvConfig()
@@ -278,6 +331,8 @@ class FileIO(BaseModel):
     # Home automation
     automation: FilePath = os.path.join('fileio', 'automation.yaml')
     tmp_automation: FilePath = os.path.join('fileio', 'tmp_automation.yaml')
+    background_tasks: FilePath = os.path.join('fileio', 'background_tasks.yaml')
+    tmp_background_tasks: FilePath = os.path.join('fileio', 'tmp_background_tasks.yaml')
     smart_devices: FilePath = os.path.join('fileio', 'smart_devices.yaml')
     contacts: FilePath = os.path.join('fileio', 'contacts.yaml')
 
@@ -297,6 +352,7 @@ class FileIO(BaseModel):
     # Jarvis internal
     location: FilePath = os.path.join('fileio', 'location.yaml')
     notes: FilePath = os.path.join('fileio', 'notes.txt')
+    processes: FilePath = os.path.join('fileio', 'processes.yaml')
 
     # macOS specifics
     app_launcher: FilePath = os.path.join('fileio', 'applauncher.scpt')
@@ -304,7 +360,9 @@ class FileIO(BaseModel):
 
     # Speech Synthesis
     speech_synthesis_wav: FilePath = os.path.join('fileio', 'speech_synthesis.wav')
+    # Store log file name in a variable as it is used in multiple modules with file IO
     speech_synthesis_log: FilePath = datetime.now().strftime(os.path.join('logs', 'speech_synthesis_%d-%m-%Y.log'))
+    speech_synthesis_id: FilePath = datetime.now().strftime(os.path.join('fileio', 'speech_synthesis_%d-%m-%Y.cid'))
 
 
 fileio = FileIO()

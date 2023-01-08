@@ -15,7 +15,7 @@ from modules.conditions import conversation, keywords
 from modules.logger.custom_logger import logger
 from modules.models import models
 from modules.offline import compatibles
-from modules.utils import shared, support
+from modules.utils import shared, support, util
 
 
 def split_phrase(phrase: str, should_return: bool = False) -> bool:
@@ -33,7 +33,7 @@ def split_phrase(phrase: str, should_return: bool = False) -> bool:
 
     if ' after ' in phrase:
         if delay_info := timed_delay(phrase=phrase):
-            speaker.speak(text=f"I will execute it after {support.time_converter(seconds=delay_info[1])} "
+            speaker.speak(text=f"I will execute it after {util.time_converter(second=delay_info[1])} "
                                f"{models.env.title}!")
             return False
 
@@ -50,27 +50,6 @@ def split_phrase(phrase: str, should_return: bool = False) -> bool:
     return exit_check
 
 
-def delay_calculator(phrase: str) -> Union[int, float]:
-    """Calculates the delay in phrase (if any).
-
-    Args:
-        phrase: Takes the phrase spoken as an argument.
-
-    Returns:
-        int:
-        Seconds of delay.
-    """
-    if not (count := support.extract_nos(input_=phrase)):
-        count = 1
-    if 'hour' in phrase:
-        delay = 3_600
-    elif 'minute' in phrase:
-        delay = 60
-    else:  # Default to # as seconds
-        delay = 1
-    return count * delay
-
-
 def delay_condition(phrase: str, delay: Union[int, float]) -> None:
     """Delays the execution after sleeping for the said time, after which it is sent to ``offline_communicator``.
 
@@ -78,7 +57,7 @@ def delay_condition(phrase: str, delay: Union[int, float]) -> None:
         phrase: Takes the phrase spoken as an argument.
         delay: Sleeps for the number of seconds.
     """
-    logger.info(f"{phrase!r} will be executed after {support.time_converter(seconds=delay)}")
+    logger.info(f"{phrase!r} will be executed after {util.time_converter(second=delay)}")
     time.sleep(delay)
     logger.info(f"Executing {phrase!r}")
     try:
@@ -103,7 +82,7 @@ def timed_delay(phrase: str) -> Tuple[str, Union[int, float]]:
             not word_match(phrase=phrase, match_list=keywords.keywords.reminder):
         split_ = phrase.split('after')
         if task := split_[0].strip():
-            delay = delay_calculator(phrase=split_[1].strip())
+            delay = support.delay_calculator(phrase=split_[1].strip())
             Process(target=delay_condition, kwargs={'phrase': task, 'delay': delay}).start()
             return task, delay
 
@@ -113,7 +92,7 @@ def initialize() -> None:
     if shared.greeting:
         speaker.speak(text="What can I do for you?")
     else:
-        speaker.speak(text=f'Good {support.part_of_day()}.')
+        speaker.speak(text=f'Good {util.part_of_day()}.')
         shared.greeting = True
     speaker.speak(run=True)
     renew()
@@ -148,13 +127,13 @@ def initiator(phrase: str = None, should_return: bool = False) -> None:
     if not phrase and should_return:
         return
     support.flush_screen()
-    if [word for word in phrase.lower().split() if word in ['morning', 'night', 'afternoon',
-                                                            'after noon', 'evening', 'goodnight']]:
+    if 'good' in phrase.lower() and word_match(phrase=phrase, match_list=('morning', 'night', 'afternoon', 'after noon',
+                                                                          'evening', 'goodnight')):
         shared.called['time_travel'] = True
         if (event := support.celebrate()) and 'night' not in phrase.lower():
             speaker.speak(text=f'Happy {event}!')
         if 'night' in phrase.split() or 'goodnight' in phrase.split():
-            Thread(target=sleep_control).start() if models.settings.macos else None
+            Thread(target=sleep_control).start()
         time_travel()
         shared.called['time_travel'] = False
     elif 'you there' in phrase.lower() or word_match(phrase=phrase, match_list=models.env.wake_words):

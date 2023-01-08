@@ -10,7 +10,6 @@ from threading import Thread
 from typing import NoReturn, Tuple
 
 import requests
-from bs4 import BeautifulSoup
 from googlehomepush import GoogleHome
 from googlehomepush.http_server import serve_file
 from joke.jokes import chucknorris, geek, icanhazdad, icndb
@@ -34,7 +33,7 @@ from modules.exceptions import CameraError, EgressErrors
 from modules.facenet import face
 from modules.logger.custom_logger import logger
 from modules.models import models
-from modules.utils import shared, support
+from modules.utils import shared, support, util
 from version import version_info
 
 db = database.Database(database=models.fileio.base_db)
@@ -56,6 +55,10 @@ def apps(phrase: str) -> None:
     Args:
         phrase: Takes the phrase spoken as an argument.
     """
+    if models.settings.os == "Linux":
+        support.unsupported_features()
+        return
+
     keyword = phrase.split()[-1] if phrase else None
     ignore = ['app', 'application']
     if not keyword or keyword in ignore:
@@ -70,7 +73,7 @@ def apps(phrase: str) -> None:
             speaker.speak(text="I didn't quite get that. Try again.")
             return
 
-    if not models.settings.macos:
+    if models.settings.os == "Windows":
         status = os.system(f'start {keyword}')
         if status == 0:
             speaker.speak(text=f'I have opened {keyword}')
@@ -115,10 +118,10 @@ def music(phrase: str = None) -> NoReturn:
         if phrase and 'speaker' in phrase:
             google_home(device=phrase, file=chosen)
         else:
-            if models.settings.macos:
-                subprocess.call(["open", chosen])
-            else:
+            if models.settings.os == "Windows":
                 os.system(f'start wmplayer "{chosen}"')
+            else:
+                subprocess.call(["open", chosen])
             support.flush_screen()
             speaker.speak(text=f"Enjoy your music {models.env.title}!")
     else:
@@ -156,7 +159,7 @@ def google_home(device: str = None, file: str = None) -> None:
     if not shared.called_by_offline:
         speaker.speak(text=f'Scanning your IP range for Google Home devices {models.env.title}!', run=True)
         sys.stdout.write('\rScanning your IP range for Google Home devices..')
-    network_id = '.'.join(network_id.split('.')[0:3])
+    network_id = '.'.join(network_id.split('.')[:3])
 
     def ip_scan(host_id: int) -> Tuple[str, str]:
         """Scans the IP range using the received args as host id in an IP address.
@@ -248,7 +251,7 @@ def meaning(phrase: str) -> None:
                 insert = 'an' if key[0] in vowel else 'a'
                 repeated = ' also ' if n != 0 else ' '
                 n += 1
-                mean = ', '.join(value[0:2])
+                mean = ', '.join(value[:2])
                 speaker.speak(text=f'{keyword} is{repeated}{insert} {key}, which means {mean}.')
             if shared.called_by_offline:
                 return
@@ -317,7 +320,7 @@ def report() -> NoReturn:
 
 def time_travel() -> None:
     """Triggered only from ``initiator()`` to give a quick update on the user's daily routine."""
-    part_day = support.part_of_day()
+    part_day = util.part_of_day()
     speaker.speak(text=f"Good {part_day} {models.env.name}!")
     if part_day == 'Night':
         if event := support.celebrate():
@@ -336,28 +339,15 @@ def time_travel() -> None:
     with db.connection:
         cursor = db.connection.cursor()
         # Use f-string or %s as table names cannot be parametrized
-        event_status = cursor.execute(f"SELECT info FROM {models.env.event_app}").fetchone()
+        event_status = cursor.execute(f"SELECT info, date FROM {models.env.event_app}").fetchone()
     if event_status and event_status[0].startswith('You'):
         speaker.speak(text=event_status[0])
     todo()
     read_gmail()
     speaker.speak(text='Would you like to hear the latest news?', run=True)
     phrase = listener.listen()
-    if word_match(phrase=phrase.lower(), match_list=keywords.keywords.ok):
+    if phrase and word_match(phrase=phrase.lower(), match_list=keywords.keywords.ok):
         news()
-
-
-def sprint_name() -> NoReturn:
-    """Generates a random sprint name."""
-    try:
-        response = requests.get(url="https://sprint-name-gen.herokuapp.com/")
-    except EgressErrors as error:
-        logger.error(error)
-        speaker.speak(text="I wasn't able to get a sprint name sir! Why not name it, Jarvis failed?")
-        return
-    soup = BeautifulSoup(response.content, 'html.parser')
-    name = soup.find('span', {'class': 'sprint-name'}).text
-    speaker.speak(text=name)
 
 
 def abusive(phrase: str) -> NoReturn:
@@ -385,7 +375,7 @@ def photo() -> str:
         return f"I'm sorry {models.env.title}! I wasn't able to take a picture."
     facenet.capture_image(filename=filename)
     if os.path.isfile(filename):
-        if models.settings.macos:
+        if models.settings.os != "Windows":
             subprocess.call(["open", filename])
         else:
             os.system(f'start {filename}')
@@ -408,10 +398,31 @@ def version() -> NoReturn:
             git_version_info = ast.literal_eval(response.text.split('=')[1].strip())
     except EgressErrors as error:
         logger.error(error)
+
+    local_changes = None
+    try:
+        git_status = subprocess.check_output('git status -s', shell=True).decode('UTF-8')
+        git_status = [g.strip() for g in git_status.splitlines()]
+        local_changes = [file.split()[-1] for file in git_status
+                         if (file.startswith('M') or file.startswith('R') or file.startswith('A'))]
+        logger.info(local_changes)
+    except (subprocess.CalledProcessError, subprocess.CalledProcessError, FileNotFoundError) as error:
+        if isinstance(error, subprocess.CalledProcessError):
+            result = error.output.decode(encoding='UTF-8').strip()
+            logger.error(f"[{error.returncode}]: {result}")
+        else:
+            logger.error(error)
+
     text = f"I'm currently running on version {'.'.join(str(c) for c in version_info)}"
     if git_version_info:
         if version_info == git_version_info:
             text += ", I'm up to date."
+            if local_changes:
+                text += f" However, I have {len(local_changes)} local changes yet to be committed."
         else:
             text += f", but the one on github is version {'.'.join(str(c) for c in git_version_info)}"
+            if local_changes:
+                text += f". I also have {len(local_changes)} local changes yet to be committed."
+    else:
+        text += f". I have {len(local_changes)} local changes yet to be committed."
     speaker.speak(text=text)

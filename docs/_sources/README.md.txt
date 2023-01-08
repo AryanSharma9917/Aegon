@@ -10,7 +10,7 @@
 
 **Platform Supported**
 
-![Generic badge](https://img.shields.io/badge/Platform-MacOS|Windows-1f425f.svg)
+![Generic badge](https://img.shields.io/badge/Platform-Linux|MacOS|Windows-1f425f.svg)
 
 **Language Stats**
 
@@ -64,7 +64,7 @@
 [![Active Development](https://img.shields.io/badge/Development%20Level-Actively%20Developed-success.svg)](https://github.com/thevickypedia/Jarvis)
 [![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-success.svg)](https://github.com/thevickypedia/Jarvis)
 
-[![Maintained](https://img.shields.io/maintenance/yes/2022)](https://api.github.com/repos/thevickypedia/Jarvis)
+[![Maintained](https://img.shields.io/maintenance/yes/2023)](https://api.github.com/repos/thevickypedia/Jarvis)
 [![Maintainer](https://img.shields.io/badge/Maintained%20By-Vignesh%20Sivanandha%20Rao-blue.svg)](https://vigneshrao.com/)
 
 **Reach Out**
@@ -87,16 +87,21 @@
      - `Settings` → `Privacy`
        - `Microphone` - **Required** to listen and respond.
        - `Camera` - **[Optional]** Required only during face recognition/detection.
-       - Unlike macOS, `Windows` pops a confirmation window to **Allow** or **Deny** access to files and folders.
-     - Install [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html#windows-installers), and [VisualStudio C++ BuildTools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+       - Unlike `macOS`, `Windows` pops a confirmation window to **Allow** or **Deny** access to files and folders.
+     - Install [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html#windows-installers), [VisualStudio C++ BuildTools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), and [Git](https://git-scm.com/download/win/)
+     - Make sure C++ build tools are installed completely and restart
+     - Add anaconda/miniconda scripts location to `PATH` in Environment Variables
+
+   - **Linux** <br> _Tested on **Ubuntu 22.04 LTS**_
+     - Store the host machine's password as the env var: `ROOT_PASSWORD`
+     - Unlike macOS and Windows, `Ubuntu` does not have app specific permissions.
 
 ## Setup
 
 > **Test Peripherals**:
 >   - Camera: [camera.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/camera/camera.py)
->   - Speaker: [speak.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/speaker/speak.py)
->   - Microphone: [mic.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/mic.py)
->   - Speech Recognition: [recognizer.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/recognizer.py)
+>   - Text to Speech: [speak.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/speaker/speak.py)
+>   - Speech to Text: [recognizer.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/recognizer.py)
 
    - Download the latest stable release from [pypi](https://github.com/thevickypedia/Jarvis/archive/master.zip) or the latest un released version from [github](https://github.com/thevickypedia/Jarvis/archive/refs/heads/master.zip)
    - Navigate into the downloaded `jarvis` or `jarvis-master` directory.
@@ -114,7 +119,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 <details>
 <summary><strong>More on Environment variables</strong></summary>
 
-- **ROOT_PASSWORD** - System password to get the system vitals and run other `sudo` commands.
+- **ROOT_PASSWORD** - System password to get the system vitals and run other `sudo` commands. Mandatory for `Linux`
 - **TITLE** - Title which Jarvis should address the user by. Defaults to `sir`
 - **NAME** - Name which Jarvis should address the user by. Defaults to `Vignesh`
 - **WAKE_WORDS** - List of wake words to initiate Jarvis' listener. Defaults to `['jarvis']` (Defaults to `['alexa']` in legacy macOS)<br>
@@ -137,13 +142,15 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 - **SENSITIVITY** - Hot word detection sensitivity. Allowed range: [0-1] Defaults to `0.5`
 - **TIMEOUT** - Timeout in seconds until which the listener should wait for speech. Defaults to `3`
 - **PHRASE_LIMIT** - Timeout in seconds until which the listener will remain active. Defaults to `None`
+- **LIMITED** - Boolean flag to run only the main version of `Jarvis` skipping background processes. Defaults to `False` Enforced based on the number of CPU cores.
+- **DEBUG** - Boolean flag to enable debug level for logging. Defaults to `False`
 - **RECOGNIZER_SETTINGS** - A JSON object that has with customized speech recognition settings.
 
     <details>
     <summary><strong><i>Custom settings for speech recognition</i></strong></summary>
 
     These are customized according to the author's voice pitch.
-    Please use [mic.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/mic.py) to figure out the suitable values in a trial and error method.
+    Please use [recognizer.py](https://github.com/thevickypedia/Jarvis/blob/master/modules/microphone/recognizer.py) to figure out the suitable values on a trial and error basis.
 
     > These settings are added (optionally), to avoid the hard coded `PHRASE_LIMIT`
     > <br>
@@ -163,9 +170,12 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 
     </details>
 
-- **LIMITED** - Boolean flag to run only the main version of `Jarvis` skipping background processes. Defaults to `False` Enforced based on the number of CPU cores.
+---
+
+### Peripherals
 - **CAMERA_INDEX** - Camera index that has to be used. Run [camera.py](https://github.com/thevickypedia/Jarvis/tree/master/modules/camera/camera.py) to get the index value of each camera.
-- **DEBUG** - Boolean flag to enable debug level for logging. Defaults to `False`
+- **SPEAKER_INDEX** - Speaker index that has to be used. Run [peripherals.py](https://github.com/thevickypedia/Jarvis/tree/master/modules/peripherals.py) to get the index value of each speaker.
+- **MICROPHONE_INDEX** - Microphone index that has to be used. Run [peripherals.py](https://github.com/thevickypedia/Jarvis/tree/master/modules/peripherals.py) to get the index value of each microphone.
 
 ### Features
 - **GIT_USER** - GitHub Username
@@ -191,11 +201,11 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 
 **Calendar/Meeting integrations**
 - **ICS_URL** - Shared calendar URL to get meetings information from. Should end with `.ics`
-- **EVENT_APP** - To read events from `outlook` or `calendar`. Defaults to `calendar` <br>
+- **EVENT_APP** - To read events from `outlook` or `calendar` application in `macOS`. Defaults to `calendar` <br>
 :bulb: &nbsp; When `calender` is used, the name of the _calendar_ within the `Calendar.app` should be **Jarvis** <br>
 
 **Background scans [Defaults to 1 hour]**
-- **SYNC_MEETINGS** - Interval in seconds to generate ``meetings`` information using `ics` URL.
+- **SYNC_MEETINGS** - Interval in seconds to generate ``meetings`` information using an `ics` URL.
 - **SYNC_EVENTS** - Interval in seconds to generate ``events`` information using `calendar` or `outlook` application.
 
 **[Wi-Fi Controls](https://github.com/thevickypedia/Jarvis/tree/master/modules/wifi)**
@@ -208,10 +218,6 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 - **VPN_PASSWORD** - Password to authenticate vpn-server. Defaults to profile password.
 - **VPN_DOMAIN** - Domain name for the hosted zone.
 - **VPN_RECORD_NAME** - Alias record name to access VPN server.
-
-**[TV](https://github.com/thevickypedia/Jarvis/blob/master/modules/tv/tv_controls.py) controls** - Applies only for [LGWebOS](https://en.wikipedia.org/wiki/WebOS)
-- **TV_CLIENT_KEY** - TV's Client key. Auto-generated when used for the first time.
-- **TV_MAC** - TV's mac address. Can be single [str] or multiple [list] mac addresses (to include both wired and wireless macs).
 
 **[Car Controls](https://github.com/thevickypedia/Jarvis/blob/master/modules/car)** - Applies only for JLR vehicles subscribed to `InControl` application.
 - **CAR_EMAIL** - Email address to log in to InControl API.
@@ -228,7 +234,9 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 - **BOT_USERS** - Usernames that should have access to Jarvis.
 
 **[OS Agnostic Voice Model](https://github.com/thevickypedia/Jarvis/blob/master/modules/audio/speech_synthesis.py)**
-- **SPEECH_SYNTHESIS_TIMEOUT** - Timeout to connect to the docker container that processes text to speech requests. <br>
+- **SPEECH_SYNTHESIS_TIMEOUT** - Timeout to connect to the docker container that processes text to speech requests.
+- **SPEECH_SYNTHESIS_VOICE** - Voice for the speech synthesis model. Defaults to author's favorite.
+- **SPEECH_SYNTHESIS_QUALITY** - Quality of speech synthesis conversion. Defaults to `medium`. <br>
     <details>
     <summary><strong><i>To enable independent speech-synthesis</i></strong></summary>
 
@@ -245,7 +253,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
         rhasspy/larynx
     ```
 
-    :bulb: &nbsp; Optionally run speech synthesis on a docker container for better voices but, response might be slower. If you don't have docker installed or simply don't want to use it, set the `SPEECH_SYNTHESIS_TIMEOUT` env var to 0. This is also done automatically if failed to launch a docker container upon startup.
+    :bulb: &nbsp; Speech Synthesis can run on a docker container for better voices but, response might be negligibly slower. If you don't have docker installed or simply don't want to use it, set the `SPEECH_SYNTHESIS_TIMEOUT` env var to 0. This is also done automatically if failed to launch a docker container upon startup.
 
     </details>
 
@@ -265,22 +273,38 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 - **ROBINHOOD_ENDPOINT_AUTH** - Authentication token to access the robinhood portfolio which is generated every hour.
 - **SURVEILLANCE_ENDPOINT_AUTH** - Token to access webcam live feed via Jarvis API.
 - **SURVEILLANCE_SESSION_TIMEOUT** - Session time out for `/surveillance`. Defaults to 300 seconds.
-- **STOCK_MONITOR_ENDPOINT_AUTH** - Token to add a stock price monitor. (Will soon be made `open-source`)
 
-**Scheduler**
-- **TASKS** - Runs certain tasks at certain intervals.
+</details>
+
+### Background Tasks
+There are two options to run background tasks on Jarvis.
+
+- Jarvis can run internal tasks (offline communicator compatible) at certain intervals using a `background_tasks.yaml` file stored in `fileio` directory.
     <details>
-    <summary><strong><i>Sample value</i></strong></summary>
+    <summary><strong><i>Setup Instructions</i></strong></summary>
+
+  This is the sample content of `background_tasks.yaml`
 
     ```yaml
-    [
-      {"seconds": 10_800, "task": "remind me to drink water"},  # Runs every 3 hours
-      {"seconds": 21_600, "task": "turn off all lights"}  # Runs every 6 hours
-    ]
+    - seconds: 1_800
+      task: turn off all lights  # Runs every 30 minutes
+    - seconds: 10_800
+      task: remind me to drink water  # Runs every 3 hours ignoring the hours specified
+      ignore_hours:
+       - 21
+       - 22
+       - 23
+       - 0
+       - 1
+       - 2
+       - 3
+       - 4
+       - 5
+       - 6
     ```
     </details>
 
-- **CRONTAB** - Runs scheduled tasks using cron expressions without using actual crontab.
+- **CRONTAB** - Runs external tasks using cron expressions. Needs to be stored as env var.
     <details>
     <summary><strong><i>Sample value</i></strong></summary>
 
@@ -291,8 +315,6 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
     ]
     ```
     </details>
-
-</details>
 
 ### Contacts
 Jarvis can send on demand notifications using a ``contacts.yaml`` file stored in ``fileio`` directory. Uses [gmail-connector](https://pypi.org/project/gmail-connector/) for SMS and email notifications.
@@ -313,14 +335,28 @@ email:
 </details>
 
 ### Smart Devices
-A source file `smart_devices.yaml` is used to store smart devices' hostnames. `Jarvis` supports [`MagicHome` lights](https://www.amazon.com/gp/product/B08C7GY43L) and `LGWebOS` TVs.
+A source file `smart_devices.yaml` is used to store smart devices' hostnames.
+Jarvis supports `MagicHome` for [lights](https://www.amazon.com/gp/product/B08C7GY43L), `LGWebOS` and `Roku` for TVs.
+
+- TV hostnames should include the brand name [`LG`/`Roku`] to distinguish the modules accordingly.
+  - This will be set by default, if yours doesn't include the brand name change it in the TV settings.
+
+- For `Roku` TVs, make sure the `Bandwidth saver` feature is turned off under,
+    ```text
+    Settings/Network/Bandwidth saver >> Off
+    ```
+
+- For first time users on `LGWebOS` TVs, there will be a prompt on the TV to accept the connection request. 
+  - Once the connection request is accepted a client key will be generated and logged.
+  - Please make sure to store this in `smart_devices.yaml` file to avoid repeated connection prompt.
 
 <details>
 <summary><strong><i>Setup Instructions</i></strong></summary>
 
-> Note: Jarvis currently supports only one hostname for TV but multiple for lights.
-
-- The name used in the keys will be the identifier of those light bulbs.
+- TV identifiers should have the word `tv` to distinguish between lights and tv.
+- The name used in the keys (for both lights and tv) will be the identifier when an action is requested.
+- Lights should be a dictionary of identifier and a list of hostnames.
+- TVs should be a nested dictionary of multiple parameters.
 - The source file (`smart_devices.yaml`) should be as following:
 
 ```yaml
@@ -336,7 +372,15 @@ living room:
   - 'HOSTNAMES'
 party mode:  # Light hostnames that needs to be engaged for party mode, if not present individual lights can be enabled
   - 'HOSTNAMES'
-tv: 'LGWEBOSTV'
+living room tv:
+  hostname: 'HOSTNAME'
+  client_key: 'CLIENT_KEY'  # Generated automatically if unavailable
+  mac_address:  # Mac addresses can either be a string or a list
+  - 'WIRED_MAC_ADDRESS'
+  - 'WIRELESS_MAC_ADDRESS'
+bedroom tv:
+  hostname: 'HOSTNAME'
+  mac_address: 'MAC_ADDRESS'
 ```
 </details>
 
@@ -371,12 +415,13 @@ The YAML file should be a dictionary within a dictionary that looks like the bel
   task: set my bedroom lights to 100%
 09:00 PM:  # Runs daily
   task: set my bedroom lights to 5%
+12:00 AM:  # Even performs tasks that are not supported via voice commands
+  task: restart all background processes
 ```
 </details>
 
 ## Feature(s) Implementation
-Please refer [wiki](https://github.com/thevickypedia/Jarvis/wiki) for API usage, access controls, env variables, 
-features' overview and demo videos.
+Please refer [wiki](https://github.com/thevickypedia/Jarvis/wiki) for API usage, access controls, env variables, features' overview and demo videos.
 
 ## Coding Standards
 Docstring format: [`Google`](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) <br>
@@ -384,16 +429,29 @@ Styling conventions: [`PEP 8`](https://www.python.org/dev/peps/pep-0008/) <br>
 Clean code with pre-commit hooks: [`flake8`](https://flake8.pycqa.org/en/latest/) and 
 [`isort`](https://pycqa.github.io/isort/)
 
+## [Release Notes](https://github.com/thevickypedia/Jarvis/blob/master/release_notes.rst)
+**Requirement**
+```shell
+python -m pip install changelog-generator
+```
+
+**Usage**
+```shell
+changelog reverse -f release_notes.rst -t 'Release Notes'
+```
+
 ## Linting
 `PreCommit` will ensure linting, and the doc creation are run on every commit.
 
 **Requirement**
-<br>
-`pip install --no-cache --upgrade sphinx pre-commit recommonmark`
+```shell
+pip install --no-cache --upgrade sphinx==5.1.1 pre-commit recommonmark
+```
 
 **Usage**
-<br>
-`pre-commit run --all-files`
+```shell
+pre-commit run --all-files
+```
 
 ## Pypi Package
 [![pypi-module](https://img.shields.io/badge/Software%20Repository-pypi-1f425f.svg)](https://packaging.python.org/tutorials/packaging-projects/)

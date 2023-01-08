@@ -17,7 +17,7 @@ importlib.reload(module=logging)
 FAILED_CONNECTIONS = {'count': 0}
 
 
-def handler() -> NoReturn:
+def telegram_api() -> NoReturn:
     """Initiates polling for new messages.
 
     Handles:
@@ -25,6 +25,7 @@ def handler() -> NoReturn:
         - ConnectionError: Initiates after 10, 20 or 30 seconds. Depends on retry count. Shuts off after 3 attempts.
     """
     config.multiprocessing_logger(filename=os.path.join('logs', 'telegram_%d-%m-%Y.log'))
+    logger.addFilter(filter=config.AddProcessName(process_name=telegram_api.__name__))
     if not models.env.bot_token:
         logger.info("Bot token is required to start the Telegram Bot")
         return
@@ -35,7 +36,7 @@ def handler() -> NoReturn:
     except BotInUse as error:
         logger.error(error)
         logger.info("Restarting message poll to take over..")
-        handler()
+        telegram_api()
     except EgressErrors as error:
         logger.critical(error)
         FAILED_CONNECTIONS['count'] += 1
@@ -45,7 +46,7 @@ def handler() -> NoReturn:
         else:
             logger.info(f"Restarting in {FAILED_CONNECTIONS['count'] * 10} seconds.")
             time.sleep(FAILED_CONNECTIONS['count'] * 10)
-            handler()
+            telegram_api()
     except RecursionError as error:
         logger.error(error)
         restart_control(quiet=True)

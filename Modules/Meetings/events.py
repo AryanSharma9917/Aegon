@@ -4,7 +4,8 @@ import sqlite3
 import subprocess
 from datetime import datetime
 from multiprocessing import Process
-from multiprocessing.context import TimeoutError as ThreadTimeoutError
+from multiprocessing.context import \
+    TimeoutError as ThreadTimeoutError  # noqa: PyProtectedMember
 from multiprocessing.pool import ThreadPool
 from typing import NoReturn
 
@@ -57,8 +58,8 @@ def events_gatherer() -> str:
         - If no events, returns a message saying there are no events in the next 12 hours.
         - On failure, returns a message saying Jarvis was unable to read calendar/outlook.
     """
-    if not models.settings.macos:
-        return f"Reading events from {models.env.event_app} is not possible on Windows operating system."
+    if models.settings.os != "Darwin":
+        return f"Reading events from {models.env.event_app} is currently possible only on macOS."
     failure = None
     process = subprocess.Popen(["/usr/bin/osascript", models.fileio.event_script] + [str(arg) for arg in [1, 3]],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -77,7 +78,7 @@ def events_gatherer() -> str:
         elif err_code in ["(-10810)", "(-609)", "(-600)"]:  # If unable to launch the app or app terminates.
             event_app_launcher()
         if not failure:
-            failure = f"Unable to read {models.env.event_app} - [{error}]\n{err_msg}"
+            failure = f"[{models.env.event_app}:{error}] - {err_msg}"
         logger.error(failure)
         # failure = failure.replace('"', '')  # An identifier can’t go after this “"”
         # os.system(f"""osascript -e 'display notification "{failure}" with title "Jarvis"'""")
@@ -120,12 +121,14 @@ def events() -> None:
     if event_status and event_status[1] == datetime.now().strftime('%Y_%m_%d'):
         speaker.speak(text=event_status[0])
     elif event_status:
-        Process(target=events_writer).start()
         logger.warning(f"Date in event status ({event_status[1]}) does not match the current date "
                        f"({datetime.now().strftime('%Y_%m_%d')})")
+        logger.info(f"Starting adhoc process to update {models.env.event_app} table.")
+        Process(target=events_writer).start()
         speaker.speak(text=f"Events table is outdated {models.env.title}. Please try again in a minute or two.")
     else:
         if shared.called_by_offline:
+            logger.info(f"Starting adhoc process to get events from {models.env.event_app}.")
             Process(target=events_writer).start()
             speaker.speak(text=f"Events table is empty {models.env.title}. Please try again in a minute or two.")
             return

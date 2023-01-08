@@ -65,6 +65,9 @@ def set_alarm(phrase: str) -> None:
     Args:
         phrase: Takes the voice recognized statement as argument and extracts time from it.
     """
+    if models.settings.limited:
+        speaker.speak(text="Alarm features are currently unavailable, as you're running on restricted mode.")
+        return
     if 'minute' in phrase:
         if minutes := support.extract_nos(input_=phrase, method=int):
             hour, minute, am_pm = (datetime.now() + timedelta(minutes=minutes)).strftime("%I %M %p").split()
@@ -122,7 +125,7 @@ def kill_alarm(phrase: str) -> None:
     if not alarm_state:
         speaker.speak(text=f"You have no {word}s set {models.env.title}!")
     elif len(alarm_state) == 1:
-        hour, minute, am_pm = alarm_state[0][0:2], alarm_state[0][3:5], alarm_state[0][6:8]
+        hour, minute, am_pm = alarm_state[0][:2], alarm_state[0][3:5], alarm_state[0][6:8]
         os.remove(f"alarm/{alarm_state[0]}")
         speaker.speak(text=f"Your {word} at {hour}:{minute} {am_pm} has been silenced {models.env.title}!")
     else:
@@ -150,7 +153,7 @@ def kill_alarm(phrase: str) -> None:
 def alarm_executor() -> NoReturn:
     """Runs the ``alarm.mp3`` file at max volume and reverts the volume after 3 minutes."""
     volume(level=100)
-    if models.settings.macos:
+    if models.settings.os != "Windows":
         subprocess.call(["open", models.indicators.alarm])
     else:
         os.system(f'start wmplayer {models.indicators.alarm}')

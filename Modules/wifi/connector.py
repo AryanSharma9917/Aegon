@@ -32,7 +32,7 @@ def process_err(error: Union[subprocess.CalledProcessError, subprocess.Subproces
 
 
 class ControlConnection:
-    """Controller for Wi-Fi connection settings.
+    """Wrapper for Wi-Fi connection.
 
     >>> ControlConnection
 
@@ -74,6 +74,19 @@ class ControlConnection:
             logger.error(f'Unable to connect to {models.env.wifi_ssid}')
             logger.error(error)
 
+    @staticmethod
+    def linux_connector() -> bool:
+        """Connects to Wi-Fi using SSID and password in env vars for Linux."""
+        cmd = f"nmcli d wifi connect '{models.env.wifi_ssid}' password '{models.env.wifi_password}'"
+        try:
+            result = subprocess.check_output(cmd, shell=True)
+        except ERRORS as error:
+            process_err(error)
+            return False
+        logger.info(f'Connected to {models.env.wifi_ssid}')
+        logger.debug(result.decode(encoding='UTF-8').strip())
+        return True
+
     def win_connector(self) -> bool:
         """Connects to Wi-Fi using SSID and password in env vars for Windows."""
         logger.info(f'Connecting to {models.env.wifi_ssid} in WiFi range')
@@ -97,11 +110,10 @@ class ControlConnection:
         """Establish a new connection using a xml config for Windows."""
         logger.info(f"Establishing a new connection to {models.env.wifi_ssid}")
         command = "netsh wlan add profile filename=\"" + models.env.wifi_ssid + ".xml\"" + " interface=Wi-Fi"
-        config = templates.GenericTemplates.win_wifi_xml
-        template = jinja2.Template(config).render(WIFI_SSID=models.env.wifi_ssid,
-                                                  WIFI_PASSWORD=models.env.wifi_password)
+        rendered = jinja2.Template(templates.generic.win_wifi_xml).render(WIFI_SSID=models.env.wifi_ssid,
+                                                                          WIFI_PASSWORD=models.env.wifi_password)
         with open(f'{models.env.wifi_ssid}.xml', 'w') as file:
-            file.write(template)
+            file.write(rendered)
         try:
             result = subprocess.check_output(command, shell=True)
             logger.info(result.decode(encoding="UTF-8"))
@@ -116,9 +128,12 @@ class ControlConnection:
         if not models.env.wifi_ssid or not models.env.wifi_password:
             logger.warning("Cannot connect to Wi-Fi without SSID and password.")
             return False
-        if models.settings.macos:
+        if models.settings.os == "Darwin":
             return self.darwin_connector()
-        return self.win_connector()
+        elif models.settings.os == "Windows":
+            return self.win_connector()
+        else:
+            return self.linux_connector()
 
 
 class ControlPeripheral:
@@ -149,6 +164,32 @@ class ControlPeripheral:
         except ERRORS as error:
             process_err(error)
 
+    @staticmethod
+    def linux_enable() -> NoReturn:
+        """Enables Wi-Fi on Linux."""
+        try:
+            result = subprocess.run("nmcli radio wifi on", shell=True)
+            if result.returncode:
+                logger.error("Failed to enable Wi-Fi")
+            else:
+                logger.info("Wi-Fi has been enabled.")
+            return result.returncode == 0
+        except ERRORS as error:
+            process_err(error)
+
+    @staticmethod
+    def linux_disable() -> NoReturn:
+        """Disables Wi-Fi on Linux."""
+        try:
+            result = subprocess.run("nmcli radio wifi on", shell=True)
+            if result.returncode:
+                logger.error("Failed to disable Wi-Fi")
+            else:
+                logger.info("Wi-Fi has been disabled.")
+            return result.returncode == 0
+        except ERRORS as error:
+            process_err(error)
+
     def win_enable(self) -> NoReturn:
         """Enables Wi-Fi on Windows."""
         try:
@@ -175,8 +216,18 @@ class ControlPeripheral:
 
     def enable(self) -> NoReturn:
         """Enable Wi-Fi (OS-agnostic)."""
-        self.darwin_enable() if models.settings.macos else self.win_enable()
+        if models.settings.os == "Darwin":
+            self.darwin_enable()
+        elif models.settings.os == "Windows":
+            self.win_enable()
+        else:
+            self.linux_enable()
 
     def disable(self) -> NoReturn:
         """Disable Wi-Fi (OS-agnostic)."""
-        self.darwin_disable() if models.settings.macos else self.win_disable()
+        if models.settings.os == "Darwin":
+            self.darwin_disable()
+        elif models.settings.os == "Windows":
+            self.win_disable()
+        else:
+            self.linux_enable()

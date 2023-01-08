@@ -7,11 +7,14 @@ from threading import Thread
 from typing import AnyStr, List, NoReturn, Union
 
 import requests
+from deepdiff import DeepDiff
 from pydantic import HttpUrl
 
 from _preexec import keywords_handler
 from executors.alarm import alarm_executor
 from executors.automation import auto_helper
+from executors.background_tasks import (remove_corrupted,
+                                        validate_background_tasks)
 from executors.conditions import conditions
 from executors.crontab import crontab_executor
 from executors.others import photo
@@ -26,29 +29,58 @@ from modules.logger import config
 from modules.logger.custom_logger import logger
 from modules.meetings import events, icalendar
 from modules.models import models
+from modules.models.classes import BackgroundTask
 from modules.offline import compatibles
-from modules.timer.executor import RepeatedTimer
 from modules.utils import shared, support
 
 db = database.Database(database=models.fileio.base_db)
 
 
-def repeated_tasks() -> Union[List[RepeatedTimer], List]:
-    """Runs tasks on a timed basis.
+def background_tasks() -> NoReturn:
+    """Initiates background tasks as per the set time."""
+    config.multiprocessing_logger(filename=os.path.join('logs', 'background_tasks_%d-%m-%Y.log'))
+    logger.addFilter(filter=config.AddProcessName(process_name=background_tasks.__name__))
+    tasks: List[BackgroundTask] = list(validate_background_tasks())
 
-    Returns:
-        list:
-        Returns a list of RepeatedTimer object(s).
-    """
-    tasks = []
-    logger.info(f"Background tasks: {len(models.env.tasks)}")
-    for task in models.env.tasks:
-        if word_match(phrase=task.task, match_list=compatibles.offline_compatible()):
-            tasks.append(RepeatedTimer(task.seconds, offline_communicator, task.task))
-        else:
-            logger.error(f"{task.task!r} is not a part of offline communication. Removing entry.")
-            models.env.tasks.remove(task)
-    return tasks
+    start_cron = time.time()
+    task_dict = {i: time.time() for i in range(len(tasks))}  # Creates a start time for each task
+    dry_run = True
+    while True:
+        for i, task in enumerate(tasks):
+            if task_dict[i] + task.seconds <= time.time() or dry_run:  # Checks a particular tasks' elapsed time
+                task_dict[i] = time.time()  # Updates that particular tasks' start time
+                if datetime.now().hour in task.ignore_hours:
+                    logger.info("Schedule skipped honoring ignore hours")
+                    continue
+                logger.info(f'Executing {task.task}')
+                try:
+                    offline_communicator(task.task)
+                except Exception as error:
+                    logger.error(error)
+                    logger.warning(f"Removing {task} from background tasks.")
+                    remove_corrupted(task=task)
+
+        if start_cron + 60 <= time.time() or dry_run:  # Condition passes every minute
+            start_cron = time.time()
+            for cron in models.env.crontab:
+                job = expression.CronExpression(line=cron)
+                if job.check_trigger():
+                    logger.info(f"Executing cron job: {job.comment}")
+                    cron_process = Process(target=crontab_executor, args=(job.comment,))
+                    cron_process.start()
+                    with db.connection:
+                        cursor = db.connection.cursor()
+                        cursor.execute("INSERT or REPLACE INTO children (crontab) VALUES (?);", (cron_process.pid,))
+                        db.connection.commit()
+
+        dry_run = False
+        time.sleep(1)  # Reduces CPU utilization as constant fileIO operations spike CPU %
+        new_tasks: List[BackgroundTask] = list(validate_background_tasks(log=False))  # Re-check for tasks
+        if new_tasks != tasks:
+            logger.warning("New task list found! Re-starting background tasks.")
+            logger.debug(DeepDiff(tasks, new_tasks, ignore_order=True))
+            tasks = new_tasks
+            task_dict = {i: time.time() for i in range(len(tasks))}  # Re-create start time for each task
 
 
 def automator() -> NoReturn:
@@ -67,9 +99,11 @@ def automator() -> NoReturn:
         - Jarvis creates/swaps a ``status`` flag upon execution, so that it doesn't repeat execution within a minute.
     """
     config.multiprocessing_logger(filename=os.path.join('logs', 'automation_%d-%m-%Y.log'))
+    logger.addFilter(filter=config.AddProcessName(process_name=automator.__name__))
     offline_list = compatibles.offline_compatible() + keywords.keywords.restart_control
-    start_events = start_meetings = start_cron = time.time()
-    events.event_app_launcher() if models.settings.macos else None
+    start_events = start_meetings = time.time()
+    if models.settings.os == "Darwin":
+        events.event_app_launcher()
     dry_run = True
     while True:
         if os.path.isfile(models.fileio.automation):
@@ -83,7 +117,7 @@ def automator() -> NoReturn:
         if start_events + models.env.sync_events <= time.time() or dry_run:
             start_events = time.time()
             event_process = Process(target=events.events_writer)
-            logger.info(f"Getting calendar events from {models.env.event_app}") if dry_run else None
+            logger.info(f"Getting events from {models.env.event_app}.") if dry_run else None
             event_process.start()
             with db.connection:
                 cursor = db.connection.cursor()
@@ -101,25 +135,13 @@ def automator() -> NoReturn:
                     models.env.sync_meetings = 99_999_999  # NEVER RUNs, as env vars are loaded only during start up
             start_meetings = time.time()
             meeting_process = Process(target=icalendar.meetings_writer)
-            logger.info("Getting calendar schedule from ICS.") if dry_run else None
+            logger.info("Getting meetings from ICS.") if dry_run else None
             meeting_process.start()
             with db.connection:
                 cursor = db.connection.cursor()
                 cursor.execute("UPDATE children SET meetings=null")
                 cursor.execute("INSERT or REPLACE INTO children (meetings) VALUES (?);", (meeting_process.pid,))
                 db.connection.commit()
-
-        if start_cron + 60 <= time.time():  # Condition passes every minute
-            start_cron = time.time()
-            for cron in models.env.crontab:
-                job = expression.CronExpression(line=cron)
-                if job.check_trigger():
-                    cron_process = Process(target=crontab_executor, args=(job.comment,))
-                    cron_process.start()
-                    with db.connection:
-                        cursor = db.connection.cursor()
-                        cursor.execute("INSERT or REPLACE INTO children (crontab) VALUES (?);", (cron_process.pid,))
-                        db.connection.commit()
 
         if alarm_state := support.lock_files(alarm_files=True):
             for each_alarm in alarm_state:
@@ -146,6 +168,7 @@ def automator() -> NoReturn:
         keywords_handler.rewrite_keywords()
 
         dry_run = False
+        time.sleep(1)  # Reduces CPU utilization
 
 
 def get_tunnel() -> Union[HttpUrl, NoReturn]:
@@ -171,15 +194,16 @@ def get_tunnel() -> Union[HttpUrl, NoReturn]:
         logger.error(error)
 
 
-def initiate_tunneling() -> NoReturn:
+def tunneling() -> NoReturn:
     """Initiates Ngrok to tunnel requests from external sources if they aren't running already.
 
     Notes:
         - ``forever_ngrok.py`` is a simple script that triggers ngrok connection in the given offline port.
         - The connection is tunneled through a public facing URL used to make ``POST`` requests to Jarvis API.
     """
+    # processName filter is not added since process runs on a single function that is covered by funcName
     config.multiprocessing_logger(filename=os.path.join('logs', 'tunnel_%d-%m-%Y.log'))
-    if not models.settings.macos:
+    if models.settings.os != "Darwin":
         return
 
     if get_tunnel():
@@ -189,7 +213,7 @@ def initiate_tunneling() -> NoReturn:
     if os.path.exists(f"{models.env.home}/JarvisHelper/venv/bin/activate"):
         logger.info('Initiating ngrok connection for offline communicator.')
         initiate = f'cd {models.env.home}/JarvisHelper && ' \
-                   f'source venv/bin/activate && export host={models.env.offline_host} ' \
+                   f'source venv/bin/activate && export HOST={models.env.offline_host} ' \
                    f'export PORT={models.env.offline_port} && python forever_ngrok.py'
         os.system(f"""osascript -e 'tell application "Terminal" to do script "{initiate}"' > /dev/null""")
     else:
