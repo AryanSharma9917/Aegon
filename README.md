@@ -405,8 +405,4 @@ Clean code with pre-commit hooks: [`flake8`](https://flake8.pycqa.org/en/latest/
 
 [https://thevickypedia.github.io/Jarvis/](https://thevickypedia.github.io/Jarvis/)
 
-## License & copyright
 
-&copy; Vignesh Sivanandha Rao
-
-Licensed under the [MIT License](https://github.com/thevickypedia/Jarvis/blob/master/LICENSE)
