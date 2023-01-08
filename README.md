@@ -88,7 +88,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
     <summary><strong><i>Custom settings for speech recognition</i></strong></summary>
 
     These are customized according to the author's voice pitch.
-    Please use [mic.py](https://github.com/Aryansharma9917/Jarvis/blob/master/modules/microphone/mic.py) to figure out the suitable values in a trial and error method.
+    Please use [mic.py](https://github.com/Aryansharma9917/Aegon/blob/master/modules/microphone/mic.py) to figure out the suitable values in a trial and error method.
 
     > These settings are added (optionally), to avoid the hard coded `PHRASE_LIMIT`
     > <br>
@@ -109,7 +109,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
     </details>
 
 - **LIMITED** - Boolean flag to run only the main version of `Jarvis` skipping background processes. Defaults to `False` Enforced based on the number of CPU cores.
-- **CAMERA_INDEX** - Camera index that has to be used. Run [camera.py](https://github.com/thevickypedia/Jarvis/tree/master/modules/camera/camera.py) to get the index value of each camera.
+- **CAMERA_INDEX** - Camera index that has to be used. Run [camera.py](https://github.com/Aryansharma9917/Aegon/tree/master/modules/camera/camera.py) to get the index value of each camera.
 - **DEBUG** - Boolean flag to enable debug level for logging. Defaults to `False`
 
 ### Features
@@ -121,19 +121,6 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 - **BIRTHDAY** - Birth date in the format DD-MM - Example: `24-April`
 - **WOLFRAM_API_KEY** - API Key from wolfram alpha.
 
-**[Email/SMS notifications](https://github.com/thevickypedia/gmail-connector)**
-- **GMAIL_USER** - Gmail account username to send and read emails.
-- **GMAIL_PASS** - Gmail account password to send and read emails.
-- **ALT_GMAIL_USER** - Alternate gmail account username to send an SMS. (`GMAIL_USER` can be re-used)
-- **ALT_GMAIL_PASS** - Alternate gmail account password to send an SMS. (`GMAIL_PASS` can be re-used)
-- **RECIPIENT** - Email address to which the emails from jarvis have to be received.
-
-**iOS integrations**
-- **ICLOUD_USER** - iCloud account username/email.
-- **ICLOUD_PASS** - iCloud account password.
-- **ICLOUD_RECOVERY** - Recovery phone number to activate lost mode on a target device - Example: `+11234567890`
-- **PHONE_NUMBER** - To send SMS from Jarvis - Example: `+11234567890`
-
 **Calendar/Meeting integrations**
 - **ICS_URL** - Shared calendar URL to get meetings information from. Should end with `.ics`
 - **EVENT_APP** - To read events from `outlook` or `calendar`. Defaults to `calendar` <br>
@@ -143,36 +130,31 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 - **SYNC_MEETINGS** - Interval in seconds to generate ``meetings`` information using `ics` URL.
 - **SYNC_EVENTS** - Interval in seconds to generate ``events`` information using `calendar` or `outlook` application.
 
-**[Wi-Fi Controls](https://github.com/thevickypedia/Jarvis/tree/master/modules/wifi)**
+**[Wi-Fi Controls](https://github.com/Aryansharma9917/Aegon/tree/master/modules/wifi)**
 - **WIFI_SSID** - SSID of the wireless connection.
 - **WIFI_PASSWORD** - Password for the wireless connection.
 - **CONNECTION_RETRY** - Frequency in seconds to check for an active internet connection. Defaults to 10 seconds.
 
-**[VPNServer](https://github.com/thevickypedia/vpn-server) integration**
-- **VPN_USERNAME** - Username to create vpn-server. Defaults to profile username.
-- **VPN_PASSWORD** - Password to authenticate vpn-server. Defaults to profile password.
-- **VPN_DOMAIN** - Domain name for the hosted zone.
-- **VPN_RECORD_NAME** - Alias record name to access VPN server.
 
-**[TV](https://github.com/thevickypedia/Jarvis/blob/master/modules/tv/tv_controls.py) controls** - Applies only for [LGWebOS](https://en.wikipedia.org/wiki/WebOS)
+**[TV](https://github.com/Aryansharma9917/Aegon/blob/master/modules/tv/tv_controls.py) controls** - Applies only for [LGWebOS](https://en.wikipedia.org/wiki/WebOS)
 - **TV_CLIENT_KEY** - TV's Client key. Auto-generated when used for the first time.
 - **TV_MAC** - TV's mac address. Can be single [str] or multiple [list] mac addresses (to include both wired and wireless macs).
 
-**[Car Controls](https://github.com/thevickypedia/Jarvis/blob/master/modules/car)** - Applies only for JLR vehicles subscribed to `InControl` application.
+**[Car Controls](https://github.com/Aryansharma9917/Aegon/blob/master/modules/car)** - Applies only for JLR vehicles subscribed to `InControl` application.
 - **CAR_EMAIL** - Email address to log in to InControl API.
 - **CAR_PASS** - Password to authenticate InControl API.
 - **CAR_PIN** - InControl PIN.
 
-**[Garage Controls](https://github.com/thevickypedia/Jarvis/blob/master/modules/myq)** - Applies only for garages using [MyQ garage controller](https://www.myq.com/products/smart-garage-control).
+**[Garage Controls](https://github.com/Aryansharma9917/Aegon/blob/master/modules/myq)** - Applies only for garages using [MyQ garage controller](https://www.myq.com/products/smart-garage-control).
 - **MYQ_USERNAME** - Email address to log in to MyQ API.
 - **MYQ_PASSWORD** - Password to authenticate MyQ API.
 
-**[Telegram Bot](https://github.com/thevickypedia/Jarvis/blob/master/executors/telegram.py) integration**
+**[Telegram Bot](https://github.com/Aryansharma9917/Aegon/blob/master/executors/telegram.py) integration**
 - **BOT_TOKEN** - Telegram BOT token.
 - **BOT_CHAT_IDS** - UserID/ChatID for a particular user.
 - **BOT_USERS** - Usernames that should have access to Jarvis.
 
-**[OS Agnostic Voice Model](https://github.com/thevickypedia/Jarvis/blob/master/modules/audio/speech_synthesis.py)**
+**[OS Agnostic Voice Model](https://github.com/Aryansharma9917/Aegon/blob/master/modules/audio/speech_synthesis.py)**
 - **SPEECH_SYNTHESIS_TIMEOUT** - Timeout to connect to the docker container that processes text to speech requests. <br>
     <details>
     <summary><strong><i>To enable independent speech-synthesis</i></strong></summary>
@@ -196,7 +178,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 
 ---
 
-**[Offline communicator](https://github.com/thevickypedia/Jarvis/blob/master/executors/offline.py)**
+**[Offline communicator](https://github.com/Aryansharma9917/Aegon/blob/master/executors/offline.py)**
 - **OFFLINE_PORT** - Port number to initiate offline communicator. Defaults to `4483`
 - **OFFLINE_PASS** - Secure phrase to authenticate offline requests. Defaults to `OfflineComm`
 - **WORKERS** - Number of uvicorn workers (processes) to spin up. Defaults to `1`
@@ -240,7 +222,7 @@ Environment variables are loaded from a `.env` file and validated using `pydanti
 </details>
 
 ### Contacts
-Jarvis can send on demand notifications using a ``contacts.yaml`` file stored in ``fileio`` directory. Uses [gmail-connector](https://pypi.org/project/gmail-connector/) for SMS and email notifications.
+Aegon can send on demand notifications using a ``contacts.yaml`` file stored in ``fileio`` directory. Uses [gmail-connector](https://pypi.org/project/gmail-connector/) for SMS and email notifications.
 
 <details>
 <summary><strong><i>Setup Instructions</i></strong></summary>
@@ -286,7 +268,7 @@ tv: 'LGWEBOSTV'
 </details>
 
 ### Automation Setup [Optional]
-Jarvis can execute [offline compatible](https://github.com/thevickypedia/Jarvis/blob/master/modules/offline/compatibles.py) tasks 
+Jarvis can execute [offline compatible](https://github.com/Aryansharma9917/Aegon/blob/master/modules/offline/compatibles.py) tasks 
 at pre-defined times without any user interaction. Uses an `automation.yaml` file as source which should be stored 
 within the directory `fileio`
 
@@ -320,7 +302,7 @@ The YAML file should be a dictionary within a dictionary that looks like the bel
 </details>
 
 ## Feature(s) Implementation
-Please refer [wiki](https://github.com/thevickypedia/Jarvis/wiki) for API usage, access controls, env variables, 
+Please refer [wiki](https://github.com/Aryansharma9917/Aegon/wiki) for API usage, access controls, env variables, 
 features' overview and demo videos.
 
 ## Coding Standards
@@ -344,10 +326,4 @@ Clean code with pre-commit hooks: [`flake8`](https://flake8.pycqa.org/en/latest/
 [![pypi-module](https://img.shields.io/badge/Software%20Repository-pypi-1f425f.svg)](https://packaging.python.org/tutorials/packaging-projects/)
 
 [https://pypi.org/project/jarvis-ironman/](https://pypi.org/project/jarvis-ironman/)
-
-## Runbook
-[![made-with-sphinx-doc](https://img.shields.io/badge/Code%20Docs-Sphinx-1f425f.svg)](https://www.sphinx-doc.org/en/master/man/sphinx-autogen.html)
-
-[https://thevickypedia.github.io/Jarvis/](https://thevickypedia.github.io/Jarvis/)
-
 
