@@ -18,9 +18,9 @@ def crontab_executor(statement: str) -> NoReturn:
         file.write('\n')
         try:
             subprocess.call(statement, shell=True, stdout=file, stderr=file)
-        except (subprocess.CalledProcessError, subprocess.SubprocessError, Exception) as error:
+        except Exception as error:
             if isinstance(error, subprocess.CalledProcessError):
                 result = error.output.decode(encoding='UTF-8').strip()
-                file.write(f"[{error.returncode}]: {result}")
+                file.write(f"[{error.returncode}]: {result}\n")
             else:
-                file.write(error)
+                file.write(f"{error}\n")

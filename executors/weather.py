@@ -31,19 +31,27 @@ def weather(phrase: str = None) -> None:
 
     place = None
     if phrase:
-        place = support.get_capitalized(phrase=phrase)
+        place = support.get_capitalized(phrase=phrase, ignore=('Sunday', 'Monday', 'Tuesday',
+                                                               'Wednesday', 'Thursday', 'Friday', 'Saturday'))
         phrase = phrase.lower()
-    sys.stdout.write('\rGetting your weather info')
     if place:
+        sys.stdout.write(f'\rGetting your weather info at {place}')
+        logger.info(f'Identified place: {place}')
         desired_location = geo_locator.geocode(place)
+        if not desired_location:
+            logger.error(f"Failed to get coordinates for the place: {place!r}")
+            speaker.speak(text=f"I'm sorry {models.env.title}! "
+                               f"I wasn't able to get the weather information at {place}!")
+            return
         coordinates = desired_location.latitude, desired_location.longitude
         located = geo_locator.reverse(coordinates, language='en')
         address = located.raw['address']
-        city = address.get('city')
-        state = address.get('state')
+        city = address.get('city') or address.get('town') or address.get('hamlet') or 'Unknown'
+        state = address.get('state', 'Unknown')
         lat = located.latitude
         lon = located.longitude
     else:
+        sys.stdout.write('\rGetting your weather info')
         try:
             with open(models.fileio.location) as file:
                 current_location = yaml.load(stream=file, Loader=yaml.FullLoader)
@@ -53,7 +61,7 @@ def weather(phrase: str = None) -> None:
             return
 
         address = current_location.get('address', {})
-        city = address.get('city', address.get('hamlet', 'Unknown'))
+        city = address.get('city') or address.get('town') or address.get('hamlet') or 'Unknown'
         state = address.get('state', 'Unknown')
         lat = current_location['latitude']
         lon = current_location['longitude']
@@ -70,6 +78,7 @@ def weather(phrase: str = None) -> None:
 
     if phrase and word_match(phrase=phrase,
                              match_list=['tomorrow', 'day after', 'next week', 'tonight', 'afternoon', 'evening']):
+        # when the weather info was requested
         if 'tonight' in phrase:
             key = 0
             tell = 'tonight'
@@ -82,24 +91,27 @@ def weather(phrase: str = None) -> None:
         elif 'next week' in phrase:
             key = -1
             next_week = datetime.fromtimestamp(response['daily'][-1]['dt']).strftime("%A, %B %d")
-            tell = f"on {' '.join(next_week.split()[0:-1])} {engine().ordinal(next_week.split()[-1])}"
+            tell = f"on {' '.join(next_week.split()[:-1])} {engine().ordinal(next_week.split()[-1])}"
         else:
             key = 0
             tell = 'today'
+
+        # which part of the day (after noon or noon is considered as full day as midday values range same as full day)
         if 'morning' in phrase:
             when = 'morn'
-            tell += 'morning'
+            tell += ' morning'
         elif 'evening' in phrase:
             when = 'eve'
-            tell += 'evening'
+            tell += ' evening'
         elif 'tonight' in phrase:
             when = 'night'
         elif 'night' in phrase:
             when = 'night'
-            tell += 'night'
+            tell += ' night'
         else:
             when = 'day'
             tell += ''
+
         if 'alerts' in response:
             alerts = response['alerts'][0]['event']
             start_alert = datetime.fromtimestamp(response['alerts'][0]['start']).strftime("%I:%M %p")
@@ -195,7 +207,7 @@ def weather(phrase: str = None) -> None:
                      f'{temp_feel_f}\N{DEGREE SIGN}. {weather_suggest}'
     else:
         output = f'The weather in {weather_location} is {temp_f}\N{DEGREE SIGN}F, with a high of {high}, and a low ' \
-                 f'of {low}. It currently feels Like {temp_feel_f}\N{DEGREE SIGN}F, and the current condition is ' \
+                 f'of {low}. It currently feels like {temp_feel_f}\N{DEGREE SIGN}F, and the current condition is ' \
                  f'{condition}. Sunrise at {sunrise}. Sunset at {sunset}.'
     if 'alerts' in response:
         alerts = response['alerts'][0]['event']

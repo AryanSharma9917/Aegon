@@ -64,6 +64,10 @@ html_static_path = ['_static']
 # Reference: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autoclass_content
 autoclass_content = 'both'
 
+# Include private methods/functions
+# Reference: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_default_options
+autodoc_default_options = {"members": True, "undoc-members": True, "private-members": True}
+
 # Add support to mark down files in sphinx documentation
 # Reference: https://www.sphinx-doc.org/en/1.5.3/markdown.html
 source_suffix = {
@@ -75,3 +79,6 @@ source_suffix = {
 # Retain the function/member order
 # Reference: https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_member_order
 autodoc_member_order = 'bysource'
+
+# Make left pane scroll
+html_css_files = ["static.css"]

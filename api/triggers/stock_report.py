@@ -4,7 +4,6 @@ import logging
 import math
 import os
 import sys
-import time
 from datetime import datetime
 from typing import NoReturn, Tuple
 
@@ -16,7 +15,6 @@ from pyrh.exceptions import InvalidTickerSymbol
 sys.path.insert(0, os.getcwd())
 
 from modules.exceptions import EgressErrors  # noqa
-from modules.logger import config  # noqa
 from modules.models import models  # noqa
 from modules.templates import templates  # noqa
 
@@ -42,7 +40,7 @@ class Investment:
         if result := raw_result.get('results'):
             self.result = result
         else:
-            logger.error(raw_result.get('detail', raw_result))
+            self.logger.error(raw_result.get('detail', raw_result))
             self.result = []
         self.rh = rh
 
@@ -203,28 +201,26 @@ class Investment:
         s2 = s2.replace('\n', '\n\t\t\t')
         s1 = s1.replace('\n', '\n\t\t\t')
 
-        template = templates.OriginTemplates.robinhood
-        rendered = jinja2.Template(template).render(TITLE=title, SUMMARY=web_text, PROFIT=profit_web, LOSS=loss_web,
-                                                    WATCHLIST_UP=s2, WATCHLIST_DOWN=s1)
+        rendered = jinja2.Template(templates.origin.robinhood).render(TITLE=title, SUMMARY=web_text, PROFIT=profit_web,
+                                                                      LOSS=loss_web, WATCHLIST_UP=s2, WATCHLIST_DOWN=s1)
         with open(models.fileio.robinhood, 'w') as static_file:
             static_file.write(rendered)
-        self.logger.info(f'Static file generated in {round(float(time.perf_counter()), 2)}s')
+        self.logger.info(f'Static file {models.fileio.robinhood!r} has been generated.')
 
     def report_gatherer(self) -> NoReturn:
         """Runs gatherer to call other dependent methods."""
         try:
             self.gatherer()
         except EgressErrors as error:
-            main_logger.error(error)
+            self.logger.error(error)
 
 
 if __name__ == '__main__':
     from executors.crontab import LOG_FILE
+    from modules.logger import config
     from modules.logger.custom_logger import logger as main_logger
 
-    filename = config.multiprocessing_logger(filename=LOG_FILE)
+    config.multiprocessing_logger(filename=LOG_FILE)
+    for log_filter in main_logger.filters:
+        main_logger.removeFilter(filter=log_filter)
     Investment(logger=main_logger).report_gatherer()
-
-    with open(filename, 'a') as file:
-        file.seek(0)
-        file.write('\n')

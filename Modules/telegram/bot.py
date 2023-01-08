@@ -6,6 +6,7 @@ import random
 import string
 import time
 import traceback
+from threading import Thread
 from typing import NoReturn, Union
 
 import requests
@@ -23,7 +24,7 @@ from modules.logger.custom_logger import logger
 from modules.models import models
 from modules.offline import compatibles
 from modules.telegram import audio_handler
-from modules.utils import support
+from modules.utils import support, util
 
 importlib.reload(module=logging)
 
@@ -79,6 +80,10 @@ def intro() -> str:
            "turn off my car\n" \
            "lock my car\n" \
            "unlock my car\n\n" \
+           "*Garage Controls*\n" \
+           "get me the status of my garage\n" \
+           "close my garage\n" \
+           "open my garage\n" \
            "*TV*\n" \
            "launch Netflix on my tv\n" \
            "increase the volume on my tv\n" \
@@ -233,7 +238,7 @@ class TelegramBot:
                 - If unable to connect to the endpoint.
 
         See Also:
-            Swaps ``offset`` value during every iteration to avoid hanging new messages.
+            Swaps ``offset`` value during every iteration to avoid reprocessing messages.
         """
         offset = 0
         logger.info(msg="Polling for incoming messages..")
@@ -356,11 +361,11 @@ class TelegramBot:
             with open(filename, 'wb') as file:
                 file.write(bytes_obj)
             converted = False
-            if models.settings.macos:
+            if models.settings.os == "Darwin":
                 transcode = audio_handler.audio_converter_mac()
                 if transcode and transcode(input_file_name=filename, output_audio_format="flac"):
                     converted = True
-            else:
+            elif models.settings.os == "Windows":
                 if audio_handler.audio_converter_win(input_filename=filename, output_audio_format="flac"):
                     converted = True
             if converted:
@@ -392,7 +397,7 @@ class TelegramBot:
         if payload.get('text', '').lower() == 'help':
             self.send_message(chat_id=payload['from']['id'],
                               response=f"{greeting()} {payload['from']['first_name']}!\n"
-                                       f"Good {support.part_of_day()}! {intro()}\n\n"
+                                       f"Good {util.part_of_day()}! {intro()}\n\n"
                                        "Please reach out at https://vigneshrao.com/contact for more info.")
             return
         if not self.authenticate(payload=payload):
@@ -407,7 +412,7 @@ class TelegramBot:
                                                                       "hey", "chao", "hiya", "aloha"], strict=True):
             self.reply_to(payload=payload,
                           response=f"{greeting()} {payload['from']['first_name']}!\n"
-                                   f"Good {support.part_of_day()}! How can I be of service today?")
+                                   f"Good {util.part_of_day()}! How can I be of service today?")
             return
         if payload['text'] == '/start':
             self.send_message(chat_id=payload['from']['id'],
@@ -444,14 +449,13 @@ class TelegramBot:
 
         if ' and ' in command and not word_match(phrase=command, match_list=keywords.keywords.avoid) and \
                 not word_match(phrase=command, match_list=multiexec):
-            for index, each in enumerate(command.split(' and '), 1 - len(command.split(' and '))):
+            for each in command.split(' and '):
                 if not word_match(phrase=each, match_list=compatibles.offline_compatible()):
                     logger.warning(f"{each!r} is not a part of offline communicator compatible request.")
                     self.send_message(chat_id=payload['from']['id'],
                                       response=f"{each!r} is not a part of offline communicator compatible request.")
                 else:
-                    self.executor(command=each, payload=payload)
-                    time.sleep(2) if index else None  # Avoid time.sleep during the last iteration
+                    Thread(target=self.executor, kwargs=dict(command=each, payload=payload)).start()
             return
 
         if not word_match(phrase=command, match_list=compatibles.offline_compatible()):
@@ -464,7 +468,7 @@ class TelegramBot:
                 logger.info(f'Request: {delay_info[0]}')
                 self.process_response(payload=payload,
                                       response="I will execute it after "
-                                               f"{support.time_converter(seconds=delay_info[1])} {models.env.title}!")
+                                               f"{util.time_converter(second=delay_info[1])} {models.env.title}!")
                 logger.info(f'Response: Task will be executed after {delay_info[1]} seconds')
                 return
         self.executor(command=command, payload=payload)

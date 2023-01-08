@@ -1,55 +1,62 @@
-import ast
 import os
+import warnings
 from typing import NoReturn
 
 import yaml
 
 from modules.conditions import keywords, keywords_base
+from modules.utils import util
 
 # Used by docs
 if not os.path.isdir('fileio'):
     os.makedirs(name='fileio')
 
-keywords_key = [__keyword for __keyword in dir(keywords_base) if not __keyword.startswith('__')]
-keywords_src = os.path.join('fileio', 'keywords.yaml')
+keywords_src = keywords_base.keyword_mapping()
+keywords_dst = os.path.join('fileio', 'keywords.yaml')
+
+get_time = lambda file: os.stat(file).st_ctime  # noqa: E731
+_updated = {'time': 0.0}  # Initiate a dict
 
 
-class Dict2Class(object):
-    """Turns a dictionary into an object."""
+def rewrite_keywords(init: bool = False) -> NoReturn:
+    """Loads keywords.yaml file if available, else loads the base keywords module as an object.
 
-    def __init__(self, dictionary: dict):
-        """Creates an object and inserts the key value pairs as members of the class.
+    Args:
+        init: Takes a boolean flag to suppress logging when triggered for the first time.
+    """
+    if os.path.isfile(keywords_dst):
+        modified = get_time(keywords_dst)
+        if _updated['time'] == modified:
+            return  # Avoid reading when there are clearly no changes made
+        _updated['time'] = modified
+        with open(keywords_dst) as file:
+            try:
+                data = yaml.load(stream=file, Loader=yaml.FullLoader) or {}
+            except yaml.YAMLError as error:
+                warnings.warn(message=str(error))
+                data = None
 
-        Args:
-            dictionary: Takes the dictionary to be converted as an argument.
-        """
-        for key in dictionary:
-            setattr(self, key, dictionary[key])
-
-
-def rewrite_keywords() -> NoReturn:
-    """Loads keywords.yaml file if available, else loads the base keywords module as an object."""
-    if os.path.isfile(keywords_src):
-        with open(keywords_src) as file:
-            data = yaml.load(stream=file, Loader=yaml.FullLoader)
-        if list(data.keys()) == keywords_key and list(data.values()) and all(list(data.values())):
-            keywords.keywords = Dict2Class(data)
+        if not data:  # Either an error occurred when reading or a manual deletion
+            if data is {} and init:  # ignore when None, since a warning will be displayed already
+                warnings.warn(
+                    f"\nSomething went wrong. {keywords_dst!r} appears to be empty."
+                    f"\nRe-sourcing {keywords_dst!r} from base."
+                )
+        elif sorted(list(data.keys())) == sorted(list(keywords_src.keys())) and data.values() and all(data.values()):
+            keywords.keywords = util.Dict2Class(data)
             return
+        else:  # Mismatch in keys
+            if init:
+                warnings.warn(
+                    "\nData mismatch between base keywords and custom keyword mapping."
+                    "\nPlease note: This mapping file is only to change the value for keywords, not the key(s) itself."
+                    f"\nRe-sourcing {keywords_dst!r} from base."
+                )
 
-    with open(keywords_base.__file__) as file:
-        data = file.read().split('\n\n')
-
-    dictionary = {}
-    for d in data:
-        if '=' not in d:
-            continue
-        var, lis = d.split(' = ')
-        dictionary[var] = ast.literal_eval(lis)
-
-    with open(keywords_src, 'w') as file:
-        yaml.dump(stream=file, data=dictionary, indent=4)
-
-    keywords.keywords = Dict2Class(dictionary)
+    with open(keywords_dst, 'w') as file:
+        yaml.dump(stream=file, data=keywords_src, indent=4)
+    _updated['time'] = get_time(keywords_dst)
+    keywords.keywords = util.Dict2Class(keywords_src)
 
 
-rewrite_keywords()
+rewrite_keywords(init=True)

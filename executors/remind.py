@@ -43,6 +43,9 @@ def reminder(phrase: str) -> None:
     Args:
         phrase: Takes the voice recognized statement as argument and extracts the time and message from it.
     """
+    if models.settings.limited:
+        speaker.speak(text="Reminder features are currently unavailable, as you're running on restricted mode.")
+        return
     message = re.search(' to (.*) at ', phrase) or re.search(' about (.*) at ', phrase) or \
         re.search(' to (.*) after ', phrase) or re.search(' about (.*) after ', phrase) or \
         re.search(' to (.*) in ', phrase) or re.search(' about (.*) in ', phrase) or \
@@ -100,10 +103,16 @@ def reminder_executor(message: str) -> NoReturn:
 
     Args:
         message: Takes the reminder message as an argument.
+
+    See Also:
+        - Personalized icons for `Linux OS <https://wiki.ubuntu.com/Artwork/BreatheIconSet/Icons>`__
     """
+    title = "REMINDER from Jarvis"
     communicator.send_sms(user=models.env.gmail_user, password=models.env.gmail_pass, number=models.env.phone_number,
-                          body=message, subject="REMINDER from Jarvis")
-    if models.settings.macos:
-        os.system(f"""osascript -e 'display notification "{message}" with title "REMINDER from Jarvis"'""")
+                          body=message, subject=title)
+    if models.settings.os == "Darwin":
+        os.system(f"""osascript -e 'display notification "{message}" with title "{title}"'""")
+    elif models.settings.os == "Windows":
+        win_notifications.WindowsBalloonTip(msg=message, title=title)
     else:
-        win_notifications.WindowsBalloonTip(msg=message, title="REMINDER from Jarvis")
+        os.system(f"""notify-send -t 0 '{title}' '{message}'""")

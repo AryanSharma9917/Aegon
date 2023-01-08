@@ -16,8 +16,8 @@ from modules.logger.custom_logger import logger
 from modules.models import models
 from modules.utils import support
 
-recognizer = Recognizer()  # initiates recognizer that uses google's translation
-microphone = Microphone()  # initiates microphone object
+recognizer = Recognizer()
+microphone = Microphone(device_index=models.env.microphone_index)
 
 if models.env.recognizer_settings:
     recognizer.energy_threshold = models.env.recognizer_settings.energy_threshold

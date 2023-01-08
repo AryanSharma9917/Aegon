@@ -1,10 +1,8 @@
-import os
 import socket
 import sys
 import time
-from typing import Dict, List, NoReturn
+from typing import Dict, Iterable, List, NoReturn
 
-from dotenv import set_key
 from playsound import playsound
 from pywebostv.connection import WebOSClient
 from pywebostv.controls import (ApplicationControl, AudioOutputSource,
@@ -16,21 +14,20 @@ from modules.models import models
 from modules.utils import shared
 
 
-class TV:
-    """All the TV controls wrapped in dedicated methods.
+class LGWebOS:
+    """Wrapper for ``LGWebOS`` TVs.
 
-    >>> TV
+    >>> LGWebOS
 
     """
 
     _init_status = False
     _reconnect = False
 
-    def __init__(self, ip_address: str = None, client_key: str = None):
-        """Client key will be logged and stored as SSM param when you accept the connection for the first time.
+    def __init__(self, ip_address: str, client_key: str):
+        """Instantiates the ``WebOSClient`` and connects to the TV.
 
-        Store the dict value as an env variable and use it as below. Using TV's ip makes the initial
-        response much quicker, but it also scans the network for the TV's ip if ip arg is not received.
+        Using TV's ip makes the initial response much quicker, but it can also scan the network for the TV's ip.
 
         Args:
             ip_address: IP address of the TV.
@@ -76,11 +73,8 @@ class TV:
 
         if self._reconnect:
             self._reconnect = False
-            if os.path.isfile('.env') and models.env.tv_client_key != store.get('client_key'):
-                set_key(dotenv_path='.env', key_to_set='TV_CLIENT_KEY', value_to_set=store.get('client_key'))
-            else:
-                logger.critical('Client key has been generated. Store it in env vars to re-use.')
-                logger.critical(f"TV_CLIENT_KEY: {store.get('client_key')}")
+            logger.critical(f'Client key has been generated. Store it in {models.fileio.smart_devices!r} to re-use.')
+            logger.critical(str(store))
 
         self.system = SystemControl(self.client)
         self.system.notify("Jarvis is controlling the TV now.") if not self._init_status else None
@@ -150,14 +144,15 @@ class TV:
         self.system.notify("Jarvis::Forward")
         self.media.fast_forward()
 
-    def get_apps(self) -> List[str]:
+    def get_apps(self) -> Iterable[str]:
         """Checks the applications installed on the TV.
 
         Returns:
             list:
             List of available apps on the TV.
         """
-        return [app["title"] for app in self.app.list_apps()]
+        for app in self.app.list_apps():
+            yield app["title"]
 
     def launch_app(self, app_name: str) -> NoReturn:
         """Launches an application.
@@ -176,14 +171,15 @@ class TV:
         """
         self.app.close(self.launch_app(app_name))
 
-    def get_sources(self) -> List[str]:
+    def get_sources(self) -> Iterable[str]:
         """Checks for the input sources on the TV.
 
         Returns:
             list:
             List of ``InputSource`` instances.
         """
-        return [source['label'] for source in self.source_control.list_sources()]
+        for source in self.source_control.list_sources():
+            yield source['label']
 
     def set_source(self, val: str) -> NoReturn:
         """Sets an ``InputSource`` instance.
@@ -192,7 +188,7 @@ class TV:
             val: Takes the input source instance value as argument.
         """
         sources = self.source_control.list_sources()
-        index = self.get_sources().index(val)
+        index = list(self.get_sources()).index(val)
         self.source_control.set_source(sources[index])
 
     def current_app(self) -> str:

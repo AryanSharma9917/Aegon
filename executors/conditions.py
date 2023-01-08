@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from executors import controls
 from executors.alarm import kill_alarm, set_alarm
 from executors.automation import automation_handler
+from executors.background_tasks import background_task_handler
 from executors.car import car
 from executors.comm_squire import send_notification
 from executors.communicator import read_gmail
@@ -22,7 +23,7 @@ from executors.location import directions, distance, locate_places, location
 from executors.myq_controller import garage
 from executors.others import (abusive, apps, facts, flip_a_coin, google_home,
                               jokes, meaning, music, news, notes, photo,
-                              repeat, report, sprint_name, version)
+                              repeat, report, version)
 from executors.remind import reminder
 from executors.robinhood import robinhood
 from executors.system import system_info, system_vitals
@@ -69,7 +70,7 @@ def conditions(phrase: str, should_return: bool = False) -> bool:
     if "*" in phrase:
         abusive(phrase)
 
-    elif word_match(phrase=phrase, match_list=keywords.send_notification):
+    elif word_match(phrase=phrase, match_list=keywords.send_notification) and 'send' in phrase:
         send_notification(phrase)
 
     elif word_match(phrase=phrase, match_list=keywords.lights):
@@ -82,10 +83,10 @@ def conditions(phrase: str, should_return: bool = False) -> bool:
         volume(phrase)
 
     elif word_match(phrase=phrase, match_list=keywords.car):
-        car(phrase.lower())
+        car(phrase)
 
     elif word_match(phrase=phrase, match_list=keywords.garage):
-        garage(phrase.lower())
+        garage(phrase)
 
     elif word_match(phrase=phrase, match_list=keywords.weather):
         weather(phrase)
@@ -155,9 +156,6 @@ def conditions(phrase: str, should_return: bool = False) -> bool:
             not word_match(phrase=phrase, match_list=keywords.avoid):
         distance(phrase)
 
-    elif word_match(phrase=phrase, match_list=conversation.form):
-        speak(text="I am a program, I'm without form.")
-
     elif word_match(phrase=phrase, match_list=keywords.locate_places):
         locate_places(phrase)
 
@@ -226,16 +224,19 @@ def conditions(phrase: str, should_return: bool = False) -> bool:
         vpn_server(phrase)
 
     elif word_match(phrase=phrase, match_list=keywords.automation):
-        automation_handler(phrase.lower())
+        automation_handler(phrase)
 
-    elif word_match(phrase=phrase, match_list=keywords.sprint):
-        sprint_name()
+    elif word_match(phrase=phrase, match_list=keywords.background_tasks):
+        background_task_handler(phrase)
 
     elif word_match(phrase=phrase, match_list=keywords.photo):
         photo()
 
     elif word_match(phrase=phrase, match_list=keywords.version):
         version()
+
+    elif word_match(phrase=phrase, match_list=conversation.form):
+        speak(text="I am a program, I'm without form.")
 
     elif word_match(phrase=phrase, match_list=conversation.greeting):
         speak(text=random.choice(['I am spectacular. I hope you are doing fine too.', 'I am doing well. Thank you.',
@@ -263,7 +264,7 @@ def conditions(phrase: str, should_return: bool = False) -> bool:
     elif word_match(phrase=phrase, match_list=conversation.age):
         relative_date = relativedelta(dt1=datetime.strptime(datetime.strftime(datetime.now(), "%Y-%m-%d"), "%Y-%m-%d"),
                                       dt2=datetime.strptime("2020-09-06", "%Y-%m-%d"))
-        statement = f"{relative_date.years} years, {relative_date.months} months and {relative_date.days} days."
+        statement = f"{relative_date.years} years, {relative_date.months} months and {relative_date.days} days"
         if not relative_date.years:
             statement = statement.replace(f"{relative_date.years} years, ", "")
         elif relative_date.years == 1:
