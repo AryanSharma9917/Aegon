@@ -12,48 +12,9 @@
 
 ![Generic badge](https://img.shields.io/badge/Platform-MacOS|Windows-1f425f.svg)
 
-**Language Stats**
-
-![Language count](https://img.shields.io/github/languages/count/thevickypedia/Jarvis)
-![Code coverage](https://img.shields.io/github/languages/top/thevickypedia/Jarvis)
-
-**Code Stats**
-
-![Modules](https://img.shields.io/github/search/thevickypedia/Jarvis/module)
-![Python](https://img.shields.io/github/search/thevickypedia/Jarvis/.py)
-![Threads](https://img.shields.io/github/search/thevickypedia/Jarvis/thread)
-![Listener](https://img.shields.io/github/search/thevickypedia/Jarvis/listener)
-![Speaker](https://img.shields.io/github/search/thevickypedia/Jarvis/speaker)
-![Bash](https://img.shields.io/github/search/thevickypedia/Jarvis/.sh)
-![AppleScript](https://img.shields.io/github/search/thevickypedia/Jarvis/.scpt)
-![Make](https://img.shields.io/github/search/thevickypedia/Jarvis/Makefile)
-
-**Deployments**
-
-[![pages-build-deployment](https://github.com/thevickypedia/Jarvis/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/thevickypedia/Jarvis/actions/workflows/pages/pages-build-deployment)
-[![pypi](https://github.com/thevickypedia/Jarvis/actions/workflows/python-publish.yml/badge.svg)](https://github.com/thevickypedia/Jarvis/actions/workflows/python-publish.yml)
-
-[![Pypi-format](https://img.shields.io/pypi/format/jarvis-ironman)](https://pypi.org/project/jarvis-ironman/#files)
-[![Pypi-status](https://img.shields.io/pypi/status/jarvis-ironman)](https://pypi.org/project/jarvis-ironman)
-[![sourcerank](https://img.shields.io/librariesio/sourcerank/pypi/jarvis-ironman)](https://libraries.io/pypi/jarvis-ironman)
-
-**Activity**
-
-[![GitHub Repo created](https://img.shields.io/date/1599432310)](https://api.github.com/repos/thevickypedia/Jarvis)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/y/thevickypedia/Jarvis)](https://api.github.com/repos/thevickypedia/Jarvis)
-[![GitHub last commit](https://img.shields.io/github/last-commit/thevickypedia/Jarvis)](https://api.github.com/repos/thevickypedia/Jarvis)
-
-**Development and Maintenance**
-
-[![Active Development](https://img.shields.io/badge/Development%20Level-Actively%20Developed-success.svg)](https://github.com/thevickypedia/Jarvis)
-[![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-success.svg)](https://github.com/thevickypedia/Jarvis)
-
-[![Maintained](https://img.shields.io/maintenance/yes/2022)](https://api.github.com/repos/thevickypedia/Jarvis)
-[![Maintainer](https://img.shields.io/badge/Maintained%20By-Vignesh%20Sivanandha%20Rao-blue.svg)](https://vigneshrao.com/)
-
 **Reach Out**
 
-[![Ask Me | Anything ](https://img.shields.io/badge/Ask%20me-Anything-1abc9c.svg)](https://vigneshrao.com/contact)
+[![Ask Me | Anything ]
 
 ## Prerequisites
    - **MacOS** <br> _Tested on **macOS High Sierra, Mojave, Catalina, Big Sur, Monterey and Ventura***_
