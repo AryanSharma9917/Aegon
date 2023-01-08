@@ -1,3 +1,4 @@
+import string
 import struct
 import sys
 import traceback
@@ -6,6 +7,7 @@ from typing import NoReturn
 
 import pvporcupine
 import pyaudio
+import yaml
 from playsound import playsound
 
 from _preexec import keywords_handler
@@ -13,13 +15,13 @@ from executors.commander import initiator
 from executors.controls import exit_process, starter, terminator
 from executors.internet import get_connection_info, ip_address, public_ip_info
 from executors.location import write_current_location
-from executors.offline import repeated_tasks
 from executors.processor import clear_db, start_processes, stop_processes
 from executors.system import hosted_device_info
 from modules.audio import listener, speaker
 from modules.exceptions import StopSignal
 from modules.logger.custom_logger import custom_handler, logger
 from modules.models import models
+from modules.peripherals import audio_engine
 from modules.utils import shared, support
 from modules.wifi.connector import ControlConnection, ControlPeripheral
 
@@ -55,11 +57,8 @@ class Activator:
         - The ``should_return`` flag ensures, the user is not disturbed when accidentally woke up by wake work engine.
     """
 
-    def __init__(self, input_device_index: int = None):
+    def __init__(self):
         """Initiates Porcupine object for hot word detection.
-
-        Args:
-            input_device_index: Index of Input Device to use.
 
         See Also:
             - Instantiates an instance of Porcupine object and monitors audio stream for occurrences of keywords.
@@ -69,11 +68,11 @@ class Activator:
         References:
             - `Audio Overflow <https://people.csail.mit.edu/hubert/pyaudio/docs/#pyaudio.Stream.read>`__ handling.
         """
-        logger.info(f"Initiating hot-word detector with sensitivity: {models.env.sensitivity}")
+        label = ', '.join([f'{string.capwords(wake)!r}: {sens}' for wake, sens in
+                           zip(models.env.wake_words, models.env.sensitivity)])
+        logger.info(f"Initiating hot-word detector with sensitivity: {label}")
         keyword_paths = [pvporcupine.KEYWORD_PATHS[x] for x in models.env.wake_words]
-        self.input_device_index = input_device_index
 
-        self.py_audio = pyaudio.PyAudio()
         arguments = {
             "library_path": pvporcupine.LIBRARY_PATH,
             "sensitivities": models.env.sensitivity
@@ -88,7 +87,7 @@ class Activator:
 
         self.detector = pvporcupine.create(**arguments)
         self.audio_stream = self.open_stream()
-        self.tasks = repeated_tasks()
+        self.label = f"Awaiting: [{label}]"
 
     def open_stream(self) -> pyaudio.Stream:
         """Initializes an audio stream.
@@ -97,20 +96,20 @@ class Activator:
             pyaudio.Stream:
             Audio stream from pyaudio.
         """
-        return self.py_audio.open(
+        return audio_engine.open(
             rate=self.detector.sample_rate,
             channels=1,
             format=pyaudio.paInt16,
             input=True,
             frames_per_buffer=self.detector.frame_length,
-            input_device_index=self.input_device_index
+            input_device_index=models.env.microphone_index
         )
 
     def executor(self) -> NoReturn:
         """Calls the listener for actionable phrase and runs the speaker node for response."""
         logger.debug(f"Detected {models.settings.bot} at {datetime.now()}")
         playsound(sound=models.indicators.acknowledgement, block=False)
-        self.py_audio.close(stream=self.audio_stream)
+        audio_engine.close(stream=self.audio_stream)
         if phrase := listener.listen(sound=False):
             try:
                 initiator(phrase=phrase, should_return=True)
@@ -126,7 +125,7 @@ class Activator:
         """Runs ``audio_stream`` in a forever loop and calls ``initiator`` when the phrase ``Jarvis`` is heard."""
         try:
             while True:
-                sys.stdout.write(f"\rAwaiting: [{', '.join(models.env.wake_words).upper()}]")
+                sys.stdout.write(f"\r{self.label}")
                 pcm = struct.unpack_from("h" * self.detector.frame_length,
                                          self.audio_stream.read(num_frames=self.detector.frame_length,
                                                                 exception_on_overflow=False))
@@ -165,8 +164,12 @@ class Activator:
             - Closes audio stream.
             - Releases port audio resources.
         """
-        for task in self.tasks:
-            task.stop()
+        # right approach for consistency but speech_synthesizer runs in a container that will be stopped at the end
+        # if models.settings.limited:
+        #     if models.settings.os != "Darwin":  # Check this condition only for limited mode
+        #         stop_processes(func_name="speech_synthesizer")
+        # else:
+        #     stop_processes()
         if not models.settings.limited:
             stop_processes()
         clear_db()
@@ -174,10 +177,10 @@ class Activator:
         self.detector.delete()
         if self.audio_stream and self.audio_stream.is_active():
             logger.info("Closing Audio Stream.")
-            self.py_audio.close(stream=self.audio_stream)
+            audio_engine.close(stream=self.audio_stream)
             self.audio_stream.close()
         logger.info("Releasing PortAudio resources.")
-        self.py_audio.terminate()
+        audio_engine.terminate()
 
 
 def begin() -> NoReturn:
@@ -194,7 +197,14 @@ def begin() -> NoReturn:
                                "Please check your connection.", run=True)
     sys.stdout.write(f"\rCurrent Process ID: {models.settings.pid}\tCurrent Volume: {models.env.volume}")
     shared.hosted_device = hosted_device_info()
-    if not models.settings.limited:
+    if models.settings.limited:
+        # Write processes mapping file before calling start_processes with func_name flag,
+        # as passing the flag will look for the file's presence
+        with open(models.fileio.processes, 'w') as file:
+            yaml.dump(stream=file, data={"jarvis": [models.settings.pid, ["Main Process"]]})
+        if models.settings.os != "Darwin":
+            shared.processes = start_processes(func_name="speech_synthesizer")
+    else:
         shared.processes = start_processes()
     write_current_location()
     Activator().start()

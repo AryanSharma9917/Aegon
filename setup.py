@@ -13,6 +13,7 @@ classifiers = [
     'Intended Audience :: Information Technology',
     'Operating System :: MacOS :: MacOS X',
     'Operating System :: Microsoft :: Windows :: Windows 10',
+    'Operating System :: POSIX :: Linux',
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
@@ -20,9 +21,20 @@ classifiers = [
     'Programming Language :: Python :: 3.11',
     'Topic :: Multimedia :: Sound/Audio :: Speech',
     'Topic :: Scientific/Engineering :: Human Machine Interfaces',
-    'Topic :: Scientific/Engineering :: Image Recognition',
     'Topic :: Scientific/Engineering :: Artificial Intelligence',
+    'Topic :: Home Automation',
+    'Topic :: Scientific/Engineering :: Image Recognition',
+    'Topic :: System :: Hardware :: Universal Serial Bus (USB) :: Wireless Controller',
     'Topic :: Multimedia :: Sound/Audio :: Conversion',
+    'Topic :: Software Development :: Libraries :: Python Modules',
+    'Topic :: System :: Hardware :: Hardware Drivers',
+    'Topic :: System :: Hardware :: Symmetric Multi-processing',
+    'Topic :: System :: Hardware :: Universal Serial Bus (USB) :: Human Interface Device (HID)',
+    'Framework :: FastAPI',
+    'Framework :: Flake8',
+    'Framework :: AsyncIO',
+    'Framework :: Sphinx',
+    'Framework :: aiohttp',
     'Natural Language :: English'
 ]
 
@@ -63,7 +75,7 @@ setup(
     name='jarvis-ironman',
     version='.'.join(str(c) for c in version_info),
     description="IronMan's Jarvis with python.",
-    long_description=read('README.md') + '\n\n' + read('CHANGELOG'),
+    long_description=read('README.md'),
     long_description_content_type='text/markdown',
     author='Vignesh Sivanandha Rao',
     author_email='svignesh1793@gmail.com',
@@ -72,12 +84,13 @@ setup(
     python_requires=">=3.8",
     install_requires=dependencies(),
     classifiers=classifiers,
-    keywords='python, natural-language-processing, text-to-speech, speech-recognition, jarvis, hotword-detection,'
-             'virtual-assistant, multiprocessing, threadpool',
+    keywords='python, home-automation, natural-language-processing, text-to-speech, speech-recognition, jarvis, '
+             'hotword-detection, virtual-assistant',
     download_url=f'{base_url}/archive/master.zip',
     project_urls={
         'Source': base_url,
         'Docs': 'https://thevickypedia.github.io/Jarvis',
+        'Release Notes': f'{base_url}/blob/master/release_notes.rst',
         'Demo': 'https://vigneshrao.com/Jarvis/Jarvis_Demo.mp4',
         'Bug Tracker': f'{base_url}/issues'
     },
