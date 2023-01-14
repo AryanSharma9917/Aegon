@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebCam - LiveView</title>
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        <!-- Disables 404 for favicon.ico which is a logo on top of the webpage tab -->
+        <link rel="shortcut icon" href="#">
+        <!-- jQuery CDN - Google -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <!-- jQuery CDN - Microsoft -->
+        <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+</head>
+<body onload="sendMessage()">
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8  offset-lg-2">
+            <h3 class="mt-5">Live Streaming</h3>
+            <img id="imageID" width="75%" onerror="imgError()">
+        </div>
+    </div>
+</div>
+<script>
+    var url = window.location.href
+    var arr = url.split('/');
+    var scheme = arr[0].replace(':', '')
+    var fqdn = arr[2]
+    if ( scheme == 'https' ) {
+        var wss_origin = "wss://" + fqdn + "/ws/"
+    } else {
+        var wss_origin = "ws://" + fqdn + "/ws/"
+    }
+    var video_origin = url.split('/surveillance').slice(0, 3).join('/video-feed');
+    document.getElementById("imageID").src=video_origin;
+</script>
+<script type="text/javascript">
+    var origin = wss_origin + {{ CLIENT_ID }}
+    var ws = new WebSocket(origin);
+    function sendMessage() {
+        ws.send("Healthy")
+    }
+    function closeSocket() {
+        ws.close();
+    }
+    function sendError() {
+        ws.send("IMG_ERROR")
+    }
+    ws.addEventListener('message', (event) => {
+        ws.binaryType = "blob";
+        if (event.data instanceof Blob) {
+            reader = new FileReader();
+            reader.onload = () => {
+            document.getElementById("imageID").removeAttribute("onerror");  // Remove attribute to avoid going into an infinite loop
+            document.getElementById("imageID").src = "data:image/jpg;base64," + reader.result;
+        };
+        reader.readAsText(event.data);
+        } else {
+            console.log(event.data);
+        }
+    });
+</script>
+<script>
+    function imgError() {
+        console.log("Failed to fetch live stream from the camera");
+        sendError();
+    }
+</script>
+</body>
+</html>
