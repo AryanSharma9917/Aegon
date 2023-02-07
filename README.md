@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://vigneshrao.com/Jarvis/logo.png" width="371px" height="350px">
+  <img src="" width="371px" height="350px">
 </p>
 <h2 align="center">Natural Language User Interface Program with Python</h2>
 
